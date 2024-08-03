@@ -53,13 +53,20 @@ public class Arm extends SubsystemBase {
     // Set motor direction
     MotorOutputConfigs motorOutputConfigs = new MotorOutputConfigs().withInverted(InvertedValue.Clockwise_Positive);
 
+    SoftwareLimitSwitchConfigs softLimit = new SoftwareLimitSwitchConfigs()
+    .withForwardSoftLimitThreshold(3.5)
+    .withForwardSoftLimitEnable(true)
+    .withReverseSoftLimitThreshold(-1.7)
+    .withReverseSoftLimitEnable(true);
+
     // Apply other configs
     TalonFXConfiguration motorConfig = new TalonFXConfiguration()
       .withSlot0(launcherGains)
       .withCurrentLimits(currentLimitsConfigs)
       .withFeedback(feedbackConfigs)
       .withMotionMagic(motionMagicConfigs)
-      .withMotorOutput(motorOutputConfigs);
+      .withMotorOutput(motorOutputConfigs)
+      .withSoftwareLimitSwitch(softLimit);
     this.motor.getConfigurator().apply(motorConfig);
     this.motor.setNeutralMode(NeutralModeValue.Brake);
 
@@ -67,8 +74,7 @@ public class Arm extends SubsystemBase {
     this.motionMagic = new MotionMagicVoltage(Constants.Arm.Positions.INTAKE)
       .withEnableFOC(true)
       .withSlot(0)
-      .withFeedForward(Constants.Arm.FEED_FORWARD)
-      .withUpdateFreqHz(1 / Constants.LOOP_INTERVAL);
+      .withFeedForward(Constants.Arm.FEED_FORWARD);
 
     // Set arm encoder position as starting if it is the first time booting the kraken
     if (Math.abs(this.getAngle()) < Constants.Arm.INITIAL_VARIANCE) this.motor.setPosition(-Math.PI / 2.0);

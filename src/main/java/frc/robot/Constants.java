@@ -31,7 +31,7 @@ public final class Constants {
   public static final double LOOP_INTERVAL = 0.01;
 
   // The feeder current minimum to buzz the driver's controller when reached
-  public static final double INTAKE_NOTIFY_CURRENT = 8.0;
+  public static final double INTAKE_NOTIFY_CURRENT = 10.0;
 
   // Size of the field
   //  public static final double fieldx = Units.inchesToMeters(501);
@@ -199,16 +199,16 @@ public final class Constants {
       public static final double INTAKE = -1.7;
       public static final double AMP = 2.00;
 
-      public static final double UNDERHAND = -Math.PI / 3.25 ;// 3.5;
+      public static final double UNDERHAND = -Math.PI / 3.25;
       public static final double OVERHAND = 0.25 * Math.PI;
     }
   }
 
   public static class Thrower {
     public static class Launcher {
-      public static final double MAX_CURRENT = 50.0;  // amps
-      public static final double INTAKE_VOLTAGE = -6.0;  // volts
-      public static final double SPEAKER_VOLTAGE = 10.0;  // volts
+      public static final double MAX_CURRENT = 80.0;  // amps
+      public static final double INTAKE_VOLTAGE = -7.0;  // volts
+      public static final double SPEAKER_VOLTAGE = 9.0;  // volts
       public static final double TOP_AMP_VOLTAGE = 4.0;  // volts
       public static final double BOTTOM_AMP_VOLTAGE = 2.0;  // volts
     }
@@ -235,6 +235,13 @@ public final class Constants {
 
     // Position of camera relative to the robot
     public static final Transform3d cameraToRobot = new Transform3d();
+  }
+
+  public static final class Yeeter {
+    public static final double INTAKE_RPS = -4000.0 / 60.0 / 2.0; // divide by 60 for RPM and 2 because gear ratio
+    public static final double AMP_RPS = 2000.0 / 60.0 / 2.0;
+    public static final double LEFT_SPEAKER_RPS = 6000.0 / 60.0 / 2.0;
+    public static final double RIGHT_SPEAKER_RPS = 5000.0 / 60.0 / 2.0;
   }
 
 //   public static class Auto {

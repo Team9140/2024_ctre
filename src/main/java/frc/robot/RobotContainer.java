@@ -8,6 +8,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -23,6 +24,13 @@ import frc.robot.generated.TunerConstants;
 
 public class RobotContainer {
 
+  // configure yeet mode by commenting one or the other
+
+  private final Yeeter thrower = Yeeter.getInstance();
+  // private final Thrower thrower = Thrower.getInstance();
+
+  // end configure yeet mode
+
   private double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
   private double MaxAngularRate = 3.0 * Math.PI; // 3/4 of a rotation per second max angular velocity
 
@@ -31,16 +39,22 @@ public class RobotContainer {
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
   private final Intake intake = Intake.getInstance();
   private final Arm arm = Arm.getInstance();
-  private final Thrower thrower = Thrower.getInstance();
+
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
       .withDeadband(MaxSpeed * 0.01).withRotationalDeadband(MaxAngularRate * 0.01) // Add a 10% deadband
       .withDriveRequestType(DriveRequestType.Velocity); // I want field-centric
-                                                               // driving in open loop
+                                                        // driving in open loop
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
   private final static double deadband = 0.12;
+
+  SwerveRequest.FieldCentricFacingAngle uhh = new SwerveRequest.FieldCentricFacingAngle().withDeadband(MaxSpeed * 0.01)
+      .withRotationalDeadband(MaxAngularRate * 0.06) // Add a 10% deadband
+      .withDriveRequestType(DriveRequestType.Velocity)
+      .withTargetDirection(new Rotation2d(0.0));
+
   private final double applyDeadband(double in) {
     if (Math.abs(in) < deadband) {
       return 0.0;
@@ -53,10 +67,13 @@ public class RobotContainer {
 
   private void configureBindings() {
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(() -> drive.withVelocityX(applyDeadband(-joystick.getLeftY()) * MaxSpeed) // Drive forward with
-                                                                                           // negative Y (forward)
+        drivetrain.applyRequest(() -> drive.withVelocityX(applyDeadband(-joystick.getLeftY()) * MaxSpeed) // Drive
+                                                                                                          // forward
+                                                                                                          // with
+            // negative Y (forward)
             .withVelocityY(applyDeadband(-joystick.getLeftX()) * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(applyDeadband(-joystick.getRightX()) * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            .withRotationalRate(applyDeadband(-joystick.getRightX()) * MaxAngularRate) // Drive counterclockwise with
+                                                                                       // negative X (left)
         ));
 
     // reset the field-centric heading on left bumper press
@@ -65,6 +82,12 @@ public class RobotContainer {
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
+
+    // this.joystick.a().whileTrue(thrower.YeeterRoutine.dynamic(Direction.kForward));
+    // this.joystick.b().whileTrue(thrower.YeeterRoutine.dynamic(Direction.kReverse));
+    // this.joystick.x().whileTrue(thrower.YeeterRoutine.quasistatic(Direction.kForward));
+    // this.joystick.y().whileTrue(thrower.YeeterRoutine.quasistatic(Direction.kReverse));
+    
 
     this.joystick.a().onTrue(
         this.arm.setUnderhand()
@@ -110,6 +133,15 @@ public class RobotContainer {
 
     this.thrower.hasNote.onTrue(new InstantCommand(() -> this.joystick.getHID().setRumble(RumbleType.kBothRumble, 0.6)))
         .onFalse(new InstantCommand(() -> this.joystick.getHID().setRumble(RumbleType.kBothRumble, 0.0)));
+
+    uhh.HeadingController.setPID(12.0, 0, 0.2);
+    this.joystick.leftTrigger().whileTrue(
+        this.drivetrain.applyRequest(() -> this.uhh.withVelocityX(applyDeadband(-joystick.getLeftY()) * MaxSpeed) // Drive
+            // forward
+            // with
+            // negative Y (forward)
+            .withVelocityY(applyDeadband(-joystick.getLeftX()) * MaxSpeed) // Drive left with negative X (left)
+        ));
 
     // this.driverController.start().onTrue(this.drive.toggleFieldRelative());
 

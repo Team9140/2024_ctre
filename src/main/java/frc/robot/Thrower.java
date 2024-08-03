@@ -20,7 +20,7 @@ public class Thrower extends SubsystemBase {
     private final TalonFX bottomLauncher;
 
     // Small feeder motor that gives notes to launchers
-    private final WPI_TalonSRX feeder = new WPI_TalonSRX(Constants.Ports.THROWER_FEEDER);;
+    private final WPI_TalonSRX feeder = new WPI_TalonSRX(Constants.Ports.THROWER_FEEDER);
 
     // Provides output for launchers
     private final VoltageOut topLauncherController;
@@ -53,7 +53,7 @@ public class Thrower extends SubsystemBase {
         this.topLauncher.getConfigurator().apply(launcherConfiguration
                 .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive)));
         this.bottomLauncher.getConfigurator().apply(launcherConfiguration
-                .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive)));
+                .withMotorOutput(new MotorOutputConfigs().withInverted(InvertedValue.CounterClockwise_Positive))); // reverse this one for new
 
         // Configure the launcher controller to use extra 15 percent power
         this.topLauncherController = new VoltageOut(0.0).withEnableFOC(true)
@@ -177,4 +177,8 @@ public class Thrower extends SubsystemBase {
 
     public final Trigger hasNote = new Trigger(() -> Math.abs(this.feeder.getStatorCurrent()) > Constants.INTAKE_NOTIFY_CURRENT
             && this.feederVolts == Constants.Thrower.Feeder.INTAKE_VOLTAGE);
+
+
+
+    
 }
