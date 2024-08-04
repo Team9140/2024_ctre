@@ -30,8 +30,8 @@ public class Yeeter extends SubsystemBase {
 
     private double feederVolts;
 
-    private final TalonFX leftRollers;
-    private final TalonFX rightRollers;
+    private final TalonFX leftRollers = new TalonFX(6, "jama");
+    private final TalonFX rightRollers = new TalonFX(5, "jama");
 
     private final VelocityVoltage leftSpeed;
     private final VelocityVoltage rightSpeed;
@@ -49,8 +49,6 @@ public class Yeeter extends SubsystemBase {
             new SysIdRoutine.Mechanism((volts) -> this.SysIDController.withOutput(volts.magnitude()), null, this));
 
     private Yeeter() {
-        leftRollers = new TalonFX(6, "jama");
-        rightRollers = new TalonFX(5, "jama");
 
         CurrentLimitsConfigs launcherCurrentLimits = new CurrentLimitsConfigs()
                 .withStatorCurrentLimit(Constants.Thrower.Launcher.MAX_CURRENT)
@@ -86,7 +84,6 @@ public class Yeeter extends SubsystemBase {
         this.feeder.configPeakCurrentDuration(500);
         this.feeder.enableCurrentLimit(true);
     }
-
 
     @Override
     public void periodic() {
@@ -168,4 +165,9 @@ public class Yeeter extends SubsystemBase {
     public final Trigger hasNote = new Trigger(
             () -> noty.calculate(Math.abs(this.feeder.getStatorCurrent()) > Constants.INTAKE_NOTIFY_CURRENT)
                     && this.feederVolts == Constants.Thrower.Feeder.INTAKE_VOLTAGE);
+
+    private static final double THRESHOLD = 5.0;
+    public final Trigger ready = new Trigger(
+            () -> Math.abs(leftRollers.getClosedLoopError().getValueAsDouble()) <= THRESHOLD
+                    && Math.abs(rightRollers.getClosedLoopError().getValueAsDouble()) <= THRESHOLD);
 }

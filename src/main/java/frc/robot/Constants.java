@@ -140,7 +140,7 @@ public final class Constants {
     public static final int DRIVER_CONTROLLER = 0;  // Xbox Controller
     public static final int AUXILIARY_CONTROLLER = 1;
 
-    public static final int CANDLE = 5;
+    public static final int CANDLE = 0;
 
     // Ports for CANSparkMax motor controllers
     public static final int FRONT_LEFT_DRIVE = 1;

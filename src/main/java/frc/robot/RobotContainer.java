@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.generated.TunerConstants;
 
 public class RobotContainer {
@@ -28,6 +29,7 @@ public class RobotContainer {
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain;
   public final Intake intake = Intake.getInstance();
   public final Arm arm = Arm.getInstance();
+  public final Cantdle lamp = Cantdle.getInstance();
 
   // configure yeet mode by commenting one or the other
 
@@ -134,9 +136,16 @@ public class RobotContainer {
             new WaitCommand(0.25),
             this.arm.setStow().alongWith(this.thrower.off())));
 
-    this.thrower.hasNote.onTrue(new InstantCommand(() -> this.joystick.getHID().setRumble(RumbleType.kBothRumble, 0.6)))
+    this.thrower.hasNote
+        .onTrue(new InstantCommand(() -> this.joystick.getHID().setRumble(RumbleType.kBothRumble, 0.6))
+            .alongWith(this.lamp.flashColor(Cantdle.ORANGE, 1.0)))
         .onFalse(new InstantCommand(() -> this.joystick.getHID().setRumble(RumbleType.kBothRumble, 0.0)));
 
+    this.thrower.ready.onTrue(this.lamp.flashColor(Cantdle.GREEN, 0.5));
+
+    Trigger FMSconnect = new Trigger(() -> DriverStation.isFMSAttached());
+    FMSconnect.onTrue(this.lamp.flashColor(Cantdle.PURPLE, 2.5));
+    
     // this.driverController.start().onTrue(this.drive.toggleFieldRelative());
 
     // this.joystick.y().whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
@@ -162,17 +171,19 @@ public class RobotContainer {
 
   public void periodic() {
     // LimelightHelpers.SetRobotOrientation("limelight",
-    //     this.drivetrain.getState().Pose.getRotation().getDegrees(),
-    //     0, 0, 0, 0, 0);
+    // this.drivetrain.getState().Pose.getRotation().getDegrees(),
+    // 0, 0, 0, 0, 0);
 
     // boolean reject = false;
-    // LimelightHelpers.PoseEstimate llPose = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+    // LimelightHelpers.PoseEstimate llPose =
+    // LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
 
     // reject |= (Math.abs(this.drivetrain.getPigeon2().getRate()) >= 360.0);
     // reject |= llPose.avgTagDist >= 4.0;
 
     // // if (!reject) {
-    // //   this.drivetrain.addVisionMeasurement(llPose.pose, llPose.timestampSeconds, VecBuilder.fill(0.6, 0.6, 9999999));
+    // // this.drivetrain.addVisionMeasurement(llPose.pose, llPose.timestampSeconds,
+    // VecBuilder.fill(0.6, 0.6, 9999999));
     // // }
 
     // f.setRobotPose(drivetrain.getState().Pose);
