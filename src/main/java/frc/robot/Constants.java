@@ -216,7 +216,7 @@ public final class Constants {
     public static class Feeder {
       public static final int MAX_CURRENT = 20;  // amps FIXME: ACTUALLY PUT A VALUE
       public static final double INTAKE_VOLTAGE = -4.0;  // volts
-      public static final double PREPARE_VOLTAGE = -1.5;  // volts
+      public static final double PREPARE_VOLTAGE = -2.0;  // volts
       public static final double LAUNCH_VOLTAGE = 12.0;  // volts
     }
   }
@@ -239,9 +239,9 @@ public final class Constants {
 
   public static final class Yeeter {
     public static final double INTAKE_RPS = -4000.0 / 60.0 / 2.0; // divide by 60 for RPM and 2 because gear ratio
-    public static final double AMP_RPS = 2000.0 / 60.0 / 2.0;
-    public static final double LEFT_SPEAKER_RPS = 6000.0 / 60.0 / 2.0;
-    public static final double RIGHT_SPEAKER_RPS = 5000.0 / 60.0 / 2.0;
+    public static final double AMP_RPS = 1500.0 / 60.0 / 2.0;
+    public static final double LEFT_SPEAKER_RPS = 6500.0 / 60.0 / 2.0;
+    public static final double RIGHT_SPEAKER_RPS = 5500.0 / 60.0 / 2.0;
   }
 
 //   public static class Auto {

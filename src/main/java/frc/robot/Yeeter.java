@@ -48,8 +48,6 @@ public class Yeeter extends SubsystemBase {
             null, Units.Volts.of(4.0), null, (state) -> SignalLogger.writeString("state", state.toString())),
             new SysIdRoutine.Mechanism((volts) -> this.SysIDController.withOutput(volts.magnitude()), null, this));
 
-        
-
     private Yeeter() {
         leftRollers = new TalonFX(6, "jama");
         rightRollers = new TalonFX(5, "jama");
@@ -58,7 +56,7 @@ public class Yeeter extends SubsystemBase {
                 .withStatorCurrentLimit(Constants.Thrower.Launcher.MAX_CURRENT)
                 .withStatorCurrentLimitEnable(true)
                 .withSupplyTimeThreshold(1.0)
-                .withSupplyCurrentLimit(100.0)
+                .withSupplyCurrentLimit(40.0)
                 .withSupplyCurrentLimitEnable(true);
 
         Slot0Configs configs = new Slot0Configs()
@@ -78,15 +76,17 @@ public class Yeeter extends SubsystemBase {
         this.leftSpeed = new VelocityVoltage(0.0).withEnableFOC(true);
         this.rightSpeed = new VelocityVoltage(0.0).withEnableFOC(true);
 
-        double slewRate = 12000.0 / 60.0 / 1.0; // zero to full speed in one second
+        double slewRate = 12000.0 / 60.0 / 0.6; // zero to full speed in half second
         this.leftSlew = new SlewRateLimiter(slewRate);
         this.rightSlew = new SlewRateLimiter(slewRate);
 
         this.feeder.setInverted(true);
         this.feeder.configContinuousCurrentLimit(Constants.Thrower.Feeder.MAX_CURRENT);
-
-        
+        this.feeder.configPeakCurrentLimit(30);
+        this.feeder.configPeakCurrentDuration(500);
+        this.feeder.enableCurrentLimit(true);
     }
+
 
     @Override
     public void periodic() {
@@ -152,6 +152,14 @@ public class Yeeter extends SubsystemBase {
             this.feederVolts = 0.0;
             this.leftSpeedTarget = 0.0;
             this.rightSpeedTarget = 0.0;
+        });
+    }
+
+    public Command eject() {
+        return this.runOnce(() -> {
+            this.feederVolts = 12.0;
+            this.leftSpeedTarget = Constants.Yeeter.AMP_RPS;
+            this.rightSpeedTarget = Constants.Yeeter.AMP_RPS;
         });
     }
 

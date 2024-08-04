@@ -19,13 +19,16 @@ public class Intake extends SubsystemBase {
     private Intake() {
         this.frontLeftMotor = new WPI_TalonSRX(Constants.Ports.FRONT_LEFT_INTAKE);
         this.frontLeftMotor.configContinuousCurrentLimit(Constants.FRONT_INTAKE_CURRENT_LIMIT);
+        this.frontLeftMotor.enableCurrentLimit(true);
 
         this.frontRightMotor = new WPI_TalonSRX(Constants.Ports.FRONT_RIGHT_INTAKE);
         this.frontRightMotor.configContinuousCurrentLimit(Constants.FRONT_INTAKE_CURRENT_LIMIT);
         this.frontRightMotor.setInverted(true);
+        this.frontRightMotor.enableCurrentLimit(true);
 
         this.backMotor = new WPI_TalonSRX(Constants.Ports.BACK_INTAKE);
         this.backMotor.configContinuousCurrentLimit(Constants.BACK_INTAKE_CURRENT_LIMIT);
+        this.backMotor.enableCurrentLimit(true);
     }
 
     @Override

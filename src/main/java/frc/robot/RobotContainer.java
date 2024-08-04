@@ -8,21 +8,26 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.generated.TunerConstants;
 
 public class RobotContainer {
+
+  public final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain;
+  public final Intake intake = Intake.getInstance();
+  public final Arm arm = Arm.getInstance();
 
   // configure yeet mode by commenting one or the other
 
@@ -31,29 +36,26 @@ public class RobotContainer {
 
   // end configure yeet mode
 
+  public RobotContainer() {
+    configureBindings();
+  }
+
   private double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
-  private double MaxAngularRate = 3.0 * Math.PI; // 3/4 of a rotation per second max angular velocity
+  private double MaxAngularRate = 3.0 * Math.PI; // 1.5 rotation per second max angular velocity
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
-  public final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
-  private final Intake intake = Intake.getInstance();
-  private final Arm arm = Arm.getInstance();
 
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-      .withDeadband(MaxSpeed * 0.01).withRotationalDeadband(MaxAngularRate * 0.01) // Add a 10% deadband
-      .withDriveRequestType(DriveRequestType.Velocity); // I want field-centric
-                                                        // driving in open loop
-  private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-  private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+      .withDeadband(MaxSpeed * 0.01).withRotationalDeadband(MaxAngularRate * 0.01)
+      .withDriveRequestType(DriveRequestType.Velocity);
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
-  private final static double deadband = 0.12;
-
   SwerveRequest.FieldCentricFacingAngle uhh = new SwerveRequest.FieldCentricFacingAngle().withDeadband(MaxSpeed * 0.01)
-      .withRotationalDeadband(MaxAngularRate * 0.06) // Add a 10% deadband
-      .withDriveRequestType(DriveRequestType.Velocity)
-      .withTargetDirection(new Rotation2d(0.0));
+      .withRotationalDeadband(MaxAngularRate * 0.06)
+      .withDriveRequestType(DriveRequestType.Velocity);
+
+  private final static double deadband = 0.12;
 
   private final double applyDeadband(double in) {
     if (Math.abs(in) < deadband) {
@@ -66,17 +68,17 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(() -> drive.withVelocityX(applyDeadband(-joystick.getLeftY()) * MaxSpeed) // Drive
-                                                                                                          // forward
-                                                                                                          // with
-            // negative Y (forward)
-            .withVelocityY(applyDeadband(-joystick.getLeftX()) * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(applyDeadband(-joystick.getRightX()) * MaxAngularRate) // Drive counterclockwise with
-                                                                                       // negative X (left)
-        ));
+    drivetrain.setDefaultCommand(
+        drivetrain.applyRequest(() -> drive.withVelocityX(applyDeadband(-joystick.getLeftY()) * MaxSpeed)
+            .withVelocityY(applyDeadband(-joystick.getLeftX()) * MaxSpeed)
+            .withRotationalRate(applyDeadband(-joystick.getRightX()) * MaxAngularRate)));
 
-    // reset the field-centric heading on left bumper press
+    uhh.HeadingController.setPID(12.0, 0, 0.2);
+    this.joystick.leftTrigger().whileTrue(
+        this.drivetrain.applyRequest(() -> this.uhh.withVelocityX(applyDeadband(-joystick.getLeftY()) * MaxSpeed * 0.5)
+            .withVelocityY(applyDeadband(-joystick.getLeftX()) * MaxSpeed * 0.5)
+            .withTargetDirection(Rotation2d.fromDegrees(90.0 - joystick.getRightX() * 10.0))));
+
     joystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
 
     if (Utils.isSimulation()) {
@@ -87,7 +89,6 @@ public class RobotContainer {
     // this.joystick.b().whileTrue(thrower.YeeterRoutine.dynamic(Direction.kReverse));
     // this.joystick.x().whileTrue(thrower.YeeterRoutine.quasistatic(Direction.kForward));
     // this.joystick.y().whileTrue(thrower.YeeterRoutine.quasistatic(Direction.kReverse));
-    
 
     this.joystick.a().onTrue(
         this.arm.setUnderhand()
@@ -121,7 +122,9 @@ public class RobotContainer {
             this.intake.intakeNote()
                 .alongWith(this.arm.setIntake())
                 .alongWith(this.thrower.setIntake()))
-        .onFalse(this.intake.off().alongWith(this.arm.setStow()).alongWith(this.thrower.off()));
+        .onFalse(this.intake.off().alongWith(this.arm.setStow()).alongWith(this.thrower.hold()));
+
+    this.joystick.leftBumper().onTrue(this.thrower.eject()).onFalse(this.thrower.off());
 
     // Throw note
     this.joystick.rightTrigger()
@@ -134,15 +137,6 @@ public class RobotContainer {
     this.thrower.hasNote.onTrue(new InstantCommand(() -> this.joystick.getHID().setRumble(RumbleType.kBothRumble, 0.6)))
         .onFalse(new InstantCommand(() -> this.joystick.getHID().setRumble(RumbleType.kBothRumble, 0.0)));
 
-    uhh.HeadingController.setPID(12.0, 0, 0.2);
-    this.joystick.leftTrigger().whileTrue(
-        this.drivetrain.applyRequest(() -> this.uhh.withVelocityX(applyDeadband(-joystick.getLeftY()) * MaxSpeed) // Drive
-            // forward
-            // with
-            // negative Y (forward)
-            .withVelocityY(applyDeadband(-joystick.getLeftX()) * MaxSpeed) // Drive left with negative X (left)
-        ));
-
     // this.driverController.start().onTrue(this.drive.toggleFieldRelative());
 
     // this.joystick.y().whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
@@ -153,11 +147,49 @@ public class RobotContainer {
     drivetrain.registerTelemetry(logger::telemeterize);
   }
 
-  public RobotContainer() {
-    configureBindings();
+  public Command getAutonomousCommand() {
+    return new SequentialCommandGroup(
+        this.arm.setOverhand()
+            .alongWith(this.thrower.prepareSpeaker())
+            .alongWith(this.intake.off()),
+        new WaitCommand(1.0),
+        this.thrower.launch(),
+        new WaitCommand(1.0),
+        this.arm.setIntake().alongWith(this.thrower.off()));
   }
 
-  public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+  Field2d f = new Field2d();
+
+  public void periodic() {
+    // LimelightHelpers.SetRobotOrientation("limelight",
+    //     this.drivetrain.getState().Pose.getRotation().getDegrees(),
+    //     0, 0, 0, 0, 0);
+
+    // boolean reject = false;
+    // LimelightHelpers.PoseEstimate llPose = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+
+    // reject |= (Math.abs(this.drivetrain.getPigeon2().getRate()) >= 360.0);
+    // reject |= llPose.avgTagDist >= 4.0;
+
+    // // if (!reject) {
+    // //   this.drivetrain.addVisionMeasurement(llPose.pose, llPose.timestampSeconds, VecBuilder.fill(0.6, 0.6, 9999999));
+    // // }
+
+    // f.setRobotPose(drivetrain.getState().Pose);
+  }
+
+  private final Pose2d startBlue = new Pose2d(1.4, 5.56, Rotation2d.fromDegrees(0.0));
+  private final Pose2d startRed = new Pose2d(15.1, 5.56, Rotation2d.fromDegrees(180.0));
+
+  public void setStartingPose() {
+    if (DriverStation.getAlliance().isPresent()) {
+      if (DriverStation.getAlliance().get().equals(Alliance.Blue)) {
+        drivetrain.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0.0));
+        drivetrain.seedFieldRelative(startBlue);
+      } else {
+        drivetrain.setOperatorPerspectiveForward(Rotation2d.fromDegrees(180.0));
+        drivetrain.seedFieldRelative(startRed);
+      }
+    }
   }
 }

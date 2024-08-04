@@ -23,6 +23,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private double m_lastSimTime;
     // ADIS16470_IMU green_gyro;
 
+
+
     private final SwerveRequest.SysIdSwerveTranslation SysIDTranslate = new SwerveRequest.SysIdSwerveTranslation();
 
     private SysIdRoutine translateRoutine = new SysIdRoutine(
