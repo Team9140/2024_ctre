@@ -169,5 +169,7 @@ public class Yeeter extends SubsystemBase {
     private static final double THRESHOLD = 5.0;
     public final Trigger ready = new Trigger(
             () -> Math.abs(leftRollers.getClosedLoopError().getValueAsDouble()) <= THRESHOLD
-                    && Math.abs(rightRollers.getClosedLoopError().getValueAsDouble()) <= THRESHOLD);
+                    && Math.abs(rightRollers.getClosedLoopError().getValueAsDouble()) <= THRESHOLD
+                    && leftSpeedTarget >= Constants.Yeeter.AMP_RPS
+                    && rightSpeedTarget >= Constants.Yeeter.AMP_RPS);
 }

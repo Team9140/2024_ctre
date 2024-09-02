@@ -197,7 +197,7 @@ public final class Constants {
     // Positions in radians
     public static class Positions {
       public static final double INTAKE = -1.7;
-      public static final double AMP = 2.00;
+      public static final double AMP = 2.0;
 
       public static final double UNDERHAND = -Math.PI / 3.25;
       public static final double OVERHAND = 0.25 * Math.PI;
@@ -239,7 +239,7 @@ public final class Constants {
 
   public static final class Yeeter {
     public static final double INTAKE_RPS = -4000.0 / 60.0 / 2.0; // divide by 60 for RPM and 2 because gear ratio
-    public static final double AMP_RPS = 1500.0 / 60.0 / 2.0;
+    public static final double AMP_RPS = 800.0 / 60.0 / 2.0;
     public static final double LEFT_SPEAKER_RPS = 6500.0 / 60.0 / 2.0;
     public static final double RIGHT_SPEAKER_RPS = 5500.0 / 60.0 / 2.0;
   }

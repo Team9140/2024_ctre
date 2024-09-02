@@ -163,6 +163,10 @@ public class Arm extends SubsystemBase {
     return this.setAngle(Constants.Arm.Positions.AMP);
   }
 
+  public boolean isAmping() {
+    return this.motionMagic.Position == Constants.Arm.Positions.AMP;
+  }
+
   /**
     * Aim the launcher at the speaker and shoot a note
     * @param distance The distance of the speaker from the robot

@@ -16,7 +16,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -68,6 +70,8 @@ public class RobotContainer {
       return (in + deadband) / (1.0 - deadband);
     }
   }
+
+  Trigger FMSconnect = new Trigger(DriverStation::isEnabled);
 
   private void configureBindings() {
     drivetrain.setDefaultCommand(
@@ -130,11 +134,23 @@ public class RobotContainer {
 
     // Throw note
     this.joystick.rightTrigger()
-        .onTrue(this.thrower.launch())
-        .onFalse(new SequentialCommandGroup(
-            this.thrower.launch(),
-            new WaitCommand(0.25),
-            this.arm.setStow().alongWith(this.thrower.off())));
+        // .onTrue(this.thrower.launch())
+        .onTrue(new ConditionalCommand(
+            new SequentialCommandGroup(
+                this.thrower.launch(),
+                new WaitCommand(0.15),
+                this.arm.setAngle(Constants.Arm.Positions.AMP - 0.15),
+                new WaitCommand(0.15),
+                this.arm.setAngle(Constants.Arm.Positions.AMP - 0.3),
+                new WaitCommand(0.35),
+                this.thrower.off(),
+                this.arm.setStow()),
+            new SequentialCommandGroup(
+                this.thrower.launch(),
+                new WaitCommand(0.5),
+                this.thrower.off(),
+                this.arm.setStow()),
+            arm::isAmping));
 
     this.thrower.hasNote
         .onTrue(new InstantCommand(() -> this.joystick.getHID().setRumble(RumbleType.kBothRumble, 0.6))
@@ -143,9 +159,8 @@ public class RobotContainer {
 
     this.thrower.ready.onTrue(this.lamp.flashColor(Cantdle.GREEN, 0.5));
 
-    Trigger FMSconnect = new Trigger(() -> DriverStation.isFMSAttached());
     FMSconnect.onTrue(this.lamp.flashColor(Cantdle.PURPLE, 2.5));
-    
+
     // this.driverController.start().onTrue(this.drive.toggleFieldRelative());
 
     // this.joystick.y().whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
@@ -170,36 +185,59 @@ public class RobotContainer {
   Field2d f = new Field2d();
 
   public void periodic() {
-    // LimelightHelpers.SetRobotOrientation("limelight",
-    // this.drivetrain.getState().Pose.getRotation().getDegrees(),
-    // 0, 0, 0, 0, 0);
+    try {
+      LimelightHelpers.SetRobotOrientation("limelight",
+          this.drivetrain.getState().Pose.getRotation().getDegrees(),
+          0, 0, 0, 0, 0);
 
-    // boolean reject = false;
-    // LimelightHelpers.PoseEstimate llPose =
-    // LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+      boolean reject = false;
+      LimelightHelpers.PoseEstimate llPose = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
 
-    // reject |= (Math.abs(this.drivetrain.getPigeon2().getRate()) >= 360.0);
-    // reject |= llPose.avgTagDist >= 4.0;
+      if (llPose != null) {
+        reject |= (Math.abs(this.drivetrain.getPigeon2().getRate()) >= 480.0);
+        // reject |= llPose.avgTagDist >= 4.0;
 
-    // // if (!reject) {
-    // // this.drivetrain.addVisionMeasurement(llPose.pose, llPose.timestampSeconds,
-    // VecBuilder.fill(0.6, 0.6, 9999999));
-    // // }
+        if (!reject) {
+          this.drivetrain.addVisionMeasurement(llPose.pose, llPose.timestampSeconds,
+              VecBuilder.fill(1.0, 1.0, 9999999));
+        }
+      }
 
-    // f.setRobotPose(drivetrain.getState().Pose);
+      f.setRobotPose(drivetrain.getState().Pose);
+    } catch (Exception e) {
+      // oops???
+    }
   }
 
-  private final Pose2d startBlue = new Pose2d(1.4, 5.56, Rotation2d.fromDegrees(0.0));
-  private final Pose2d startRed = new Pose2d(15.1, 5.56, Rotation2d.fromDegrees(180.0));
+  private final Pose2d startBlueCenter = new Pose2d(1.4, 5.56, Rotation2d.fromDegrees(0.0));
+  private final Pose2d startRedCenter = new Pose2d(15.1, 5.56, Rotation2d.fromDegrees(180.0));
 
-  public void setStartingPose() {
+  private final Pose2d startBlueAmp = new Pose2d(0.731, 6.696, Rotation2d.fromDegrees(60.0));
+  private final Pose2d startRedAmp = new Pose2d(15.8, 6.696, Rotation2d.fromDegrees(120.0));
+
+  private final Pose2d startBlueSource = new Pose2d(0.731, 4.435, Rotation2d.fromDegrees(-60.0));
+  private final Pose2d startRedSource = new Pose2d(15.8, 4.435, Rotation2d.fromDegrees(-120.0));
+
+  public void setStartingPose(String spot) {
     if (DriverStation.getAlliance().isPresent()) {
       if (DriverStation.getAlliance().get().equals(Alliance.Blue)) {
         drivetrain.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0.0));
-        drivetrain.seedFieldRelative(startBlue);
+        if (spot.equals("amp")) {
+          drivetrain.seedFieldRelative(startBlueAmp);
+        } else if (spot.equals("source")) {
+          drivetrain.seedFieldRelative(startBlueSource);
+        } else {
+          drivetrain.seedFieldRelative(startBlueCenter);
+        }
       } else {
         drivetrain.setOperatorPerspectiveForward(Rotation2d.fromDegrees(180.0));
-        drivetrain.seedFieldRelative(startRed);
+        if (spot.equals("amp")) {
+          drivetrain.seedFieldRelative(startRedAmp);
+        } else if (spot.equals("source")) {
+          drivetrain.seedFieldRelative(startRedSource);
+        } else {
+          drivetrain.seedFieldRelative(startRedCenter);
+        }
       }
     }
   }
