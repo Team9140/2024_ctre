@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.LimeLight;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -23,8 +24,13 @@ public class Robot extends TimedRobot {
   SendableChooser<String> startSpot = new SendableChooser<>();
   // PowerDistribution pd = new PowerDistribution(0, ModuleType.kRev);
 
+  
+  public final LimeLight LL = LimeLight.getInstance();
+
   @Override
   public void robotInit() {
+    LL.start();
+    
     // pd.setSwitchableChannel(true);
     m_robotContainer = new RobotContainer();
 

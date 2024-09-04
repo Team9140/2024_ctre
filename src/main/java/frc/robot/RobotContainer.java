@@ -31,6 +31,7 @@ import frc.robot.subsystems.CameraVision;
 import frc.robot.subsystems.Cantdle;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.Yeeter;
 
 public class RobotContainer {
@@ -39,6 +40,8 @@ public class RobotContainer {
   public final Intake intake = Intake.getInstance();
   public final Arm arm = Arm.getInstance();
   public final Cantdle lamp = Cantdle.getInstance();
+
+  public final LimeLight LL = LimeLight.getInstance();
 
   // configure yeet mode by commenting one or the other
 
@@ -91,7 +94,7 @@ public class RobotContainer {
             .withVelocityY(applyDeadband(-joystick.getLeftX()) * MaxSpeed)
             .withRotationalRate(applyDeadband(-joystick.getRightX()) * MaxAngularRate)));
 
-    faceBlueSpeaker.HeadingController.setPID(15.0, 0, 0.3);
+    faceBlueSpeaker.HeadingController.setPID(30.0, 0, 1.0);
     faceBlueSpeaker.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
 
     this.joystick.leftTrigger().whileTrue(
@@ -99,9 +102,8 @@ public class RobotContainer {
             .applyRequest(
                 () -> this.faceBlueSpeaker.withVelocityX(applyDeadband(-joystick.getLeftY()) * MaxSpeed * 0.75)
                     .withVelocityY(applyDeadband(-joystick.getLeftX()) * MaxSpeed * 0.75)
-                    .withRotationalDeadband(0.3)
-                    .withTargetDirection(this.drivetrain.getState().Pose.getRotation()
-                        .plus(Rotation2d.fromDegrees(-CameraVision.frontCamAngleToGoal().orElseGet(() -> 0.0))))));
+                    .withRotationalDeadband(0.1 * MaxAngularRate)
+                    .withTargetDirection(this.drivetrain.targetHeading())));
 
     joystick.start().onTrue(drivetrain.runOnce(() -> {
       Pose2d currentPose = this.drivetrain.getState().Pose;
@@ -113,9 +115,9 @@ public class RobotContainer {
       }
     }));
 
-    this.joystick.leftTrigger().whileTrue(new RunCommand(() -> {
-      this.arm.setAngleDumb(CameraVision.getUnderhandAngle());
-    }, this.arm));
+    // this.joystick.leftTrigger().whileTrue(new RunCommand(() -> {
+    // this.arm.setAngleDumb(CameraVision.getUnderhandAngle());
+    // }, this.arm));
 
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
@@ -216,35 +218,32 @@ public class RobotContainer {
   public void periodic() {
     SmartDashboard.putBoolean("continuous?", faceBlueSpeaker.HeadingController.isContinuousInputEnabled());
     SmartDashboard.putNumber("angle to goal", CameraVision.frontCamAngleToGoal().orElseGet(() -> 0.0));
-    SmartDashboard.putNumber("angle target",
-        this.drivetrain.getState().Pose.getRotation()
-            .plus(Rotation2d.fromDegrees(-CameraVision.frontCamAngleToGoal().orElseGet(() -> 0.0))).getDegrees());
+    SmartDashboard.putNumber("angle target", this.drivetrain.targetHeading().getDegrees());
     SmartDashboard.putNumber("angle target 2", Math.toDegrees(faceBlueSpeaker.HeadingController.getSetpoint()));
     SmartDashboard.putNumber("angle target 3", faceBlueSpeaker.TargetDirection.getDegrees());
 
-    // try {
-    // LimelightHelpers.SetRobotOrientation("limelight",
-    // this.drivetrain.getState().Pose.getRotation().getDegrees(),
-    // 0, 0, 0, 0, 0);
+    try {
+      LimelightHelpers.SetRobotOrientation("limelight",
+          this.drivetrain.getState().Pose.getRotation().getDegrees(),
+          0, 0, 0, 0, 0);
 
-    // boolean reject = false;
-    // LimelightHelpers.PoseEstimate llPose =
-    // LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-front");
+      boolean reject = false;
+      LimelightHelpers.PoseEstimate llPose = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-front");
 
-    // if (llPose != null) {
-    // reject |= (Math.abs(this.drivetrain.getPigeon2().getRate()) >= 480.0);
-    // // reject |= llPose.avgTagDist >= 4.0;
+      if (llPose != null) {
+        reject |= (Math.abs(this.drivetrain.getPigeon2().getRate()) >= 480.0);
+        reject |= llPose.avgTagArea <= 0.2;
+        // reject |= llPose.avgTagDist >= 4.0;
 
-    // if (!reject) {
-    // this.drivetrain.addVisionMeasurement(llPose.pose, llPose.timestampSeconds,
-    // VecBuilder.fill(5.0, 5.0, 20.0));
-    // }
-    // }
+        if (!reject) {
+          this.drivetrain.addVisionMeasurement(llPose.pose, llPose.timestampSeconds,
+              VecBuilder.fill(5.0, 5.0, 20.0));
+        }
+      }
 
-    //
-    // } catch (Exception e) {
-    // // oops???
-    // }
+    } catch (Exception e) {
+      // oops???
+    }
 
     f.setRobotPose(drivetrain.getState().Pose);
   }

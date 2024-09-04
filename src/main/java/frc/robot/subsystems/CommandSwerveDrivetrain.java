@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -11,13 +12,41 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.subsystems.LimeLight.VisionResult;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 import edu.wpi.first.units.Units;
 
 public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
+
+    private static final double kBufferDuration = 1.5;
+    private final TimeInterpolatableBuffer<Rotation2d> m_HeadingBuffer = TimeInterpolatableBuffer
+            .createBuffer(kBufferDuration);
+
+    public Optional<Rotation2d> sampleHeading(double time) {
+        return m_HeadingBuffer.getSample(time);
+    }
+
+    public Rotation2d targetHeading() {
+        VisionResult res = LimeLight.getInstance().getLatest();
+        if (res == null || !res.valid) {
+            return Rotation2d.fromDegrees(180.0);
+        }
+        Optional<Rotation2d> oldHeading = sampleHeading(res.timestamp);
+        
+        if (oldHeading.isPresent()) {
+            SmartDashboard.putNumber("old heading", oldHeading.get().getDegrees());
+            return oldHeading.get().plus(Rotation2d.fromDegrees(-res.tx));
+        } else {
+            return this.getState().Pose.getRotation();
+        }
+    }
+
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
@@ -119,6 +148,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
         SmartDashboard.putNumber("wheel current",
                 this.Modules[0].getDriveMotor().getStatorCurrent().getValueAsDouble());
+
+        m_HeadingBuffer.addSample(Timer.getFPGATimestamp(), this.getState().Pose.getRotation());
     }
 
     private void startSimThread() {
