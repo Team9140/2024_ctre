@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -153,6 +153,16 @@ public class Arm extends SubsystemBase {
    **/
   public Command setUnderhand() {
     return this.setAngle(Constants.Arm.Positions.UNDERHAND);
+  }
+
+  public Command setTuned() {
+    return this.runOnce(() -> {
+      this.motionMagic.withPosition(SmartDashboard.getNumber("underhand", 0.0));
+    });
+  }
+
+  public void setAngleDumb(double x) {
+    this.motionMagic.withPosition(x);
   }
 
   /**

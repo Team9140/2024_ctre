@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
@@ -22,8 +22,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
     // ADIS16470_IMU green_gyro;
-
-
 
     private final SwerveRequest.SysIdSwerveTranslation SysIDTranslate = new SwerveRequest.SysIdSwerveTranslation();
 
@@ -104,16 +102,23 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public void periodic() {
         SmartDashboard.putNumber("pigeon yaw", this.m_pigeon2.getYaw().getValueAsDouble());
         // SmartDashboard.putNumber("green yaw", this.green_gyro.getAngle());
-        // SmartDashboard.putNumber("diff", this.m_pigeon2.getYaw().getValueAsDouble() - this.green_gyro.getAngle());
-        SmartDashboard.putNumber("steer angle reference", this.Modules[0].getSteerMotor().getClosedLoopReference().getValueAsDouble() % (Math.PI * 2.0));
-        SmartDashboard.putNumber("steer angle", this.Modules[0].getSteerMotor().getPosition().getValueAsDouble() % (Math.PI * 2.0));
-        SmartDashboard.putNumber("steer angle error", this.Modules[0].getSteerMotor().getClosedLoopError().getValueAsDouble());
+        // SmartDashboard.putNumber("diff", this.m_pigeon2.getYaw().getValueAsDouble() -
+        // this.green_gyro.getAngle());
+        SmartDashboard.putNumber("steer angle reference",
+                this.Modules[0].getSteerMotor().getClosedLoopReference().getValueAsDouble() % (Math.PI * 2.0));
+        SmartDashboard.putNumber("steer angle",
+                this.Modules[0].getSteerMotor().getPosition().getValueAsDouble() % (Math.PI * 2.0));
+        SmartDashboard.putNumber("steer angle error",
+                this.Modules[0].getSteerMotor().getClosedLoopError().getValueAsDouble());
 
-        SmartDashboard.putNumber("wheel velocity reference", this.Modules[0].getDriveMotor().getClosedLoopReference().getValueAsDouble());
+        SmartDashboard.putNumber("wheel velocity reference",
+                this.Modules[0].getDriveMotor().getClosedLoopReference().getValueAsDouble());
         SmartDashboard.putNumber("wheel velocity", this.Modules[0].getDriveMotor().getVelocity().getValueAsDouble());
-        SmartDashboard.putNumber("wheel velocity error", this.Modules[0].getDriveMotor().getClosedLoopError().getValueAsDouble());
+        SmartDashboard.putNumber("wheel velocity error",
+                this.Modules[0].getDriveMotor().getClosedLoopError().getValueAsDouble());
 
-        SmartDashboard.putNumber("wheel current", this.Modules[0].getDriveMotor().getStatorCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("wheel current",
+                this.Modules[0].getDriveMotor().getStatorCurrent().getValueAsDouble());
     }
 
     private void startSimThread() {

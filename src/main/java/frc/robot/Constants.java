@@ -6,12 +6,8 @@
 package frc.robot;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
   * A class containing settings and values needed by several subsystems
@@ -240,7 +236,7 @@ public final class Constants {
   public static final class Yeeter {
     public static final double INTAKE_RPS = -4000.0 / 60.0 / 2.0; // divide by 60 for RPM and 2 because gear ratio
     public static final double AMP_RPS = 800.0 / 60.0 / 2.0;
-    public static final double LEFT_SPEAKER_RPS = 6500.0 / 60.0 / 2.0;
+    public static final double LEFT_SPEAKER_RPS = 6750.0 / 60.0 / 2.0;
     public static final double RIGHT_SPEAKER_RPS = 5500.0 / 60.0 / 2.0;
   }
 

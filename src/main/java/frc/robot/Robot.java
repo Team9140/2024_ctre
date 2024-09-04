@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -18,11 +19,13 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
-
+ 
   SendableChooser<String> startSpot = new SendableChooser<>();
+  // PowerDistribution pd = new PowerDistribution(0, ModuleType.kRev);
 
   @Override
   public void robotInit() {
+    // pd.setSwitchableChannel(true);
     m_robotContainer = new RobotContainer();
 
     m_robotContainer.drivetrain.getDaqThread().setThreadPriority(99);
@@ -40,10 +43,10 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData(startSpot);
 
     LimelightHelpers.setPipelineIndex("limelight", 0);
-    LimelightHelpers.SetFiducialIDFiltersOverride("limelight", new int[] {4, 3, 7, 8});
+    LimelightHelpers.SetFiducialIDFiltersOverride("limelight", new int[] { 4, 3, 7, 8 });
+
+    SmartDashboard.putNumber("underhand", Constants.Arm.Positions.UNDERHAND);
   }
-
-
 
   @Override
   public void robotPeriodic() {
@@ -91,6 +94,12 @@ public class Robot extends TimedRobot {
     }
 
     SignalLogger.start();
+    if (DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue)
+        .equals(DriverStation.Alliance.Blue)) {
+          m_robotContainer.drivetrain.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
+    } else {
+      m_robotContainer.drivetrain.setOperatorPerspectiveForward(Rotation2d.fromDegrees(180));
+    }
   }
 
   @Override
