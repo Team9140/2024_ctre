@@ -87,10 +87,10 @@ public class RobotContainer {
     this.joystick.a().onTrue(
         this.thrower.prepareSpeaker()
             .alongWith(this.intake.off())
-            .alongWith(this.drivetrain.setDriveMode(DriveMode.UNDERHAND_SPEAKER_DRIVE)))
-        .whileTrue(new RunCommand(() -> {
-          this.arm.setAngleDumb(CameraVision.getUnderhandAngle());
-        }, this.arm));
+            .alongWith(this.drivetrain.setDriveMode(DriveMode.UNDERHAND_SPEAKER_DRIVE))
+            .andThen(new RunCommand(() -> {
+              this.arm.setAngleDumb(CameraVision.getUnderhandAngle());
+            }, this.arm)));
 
     this.joystick.y().onTrue(
         this.arm.setOverhand()
@@ -180,11 +180,9 @@ public class RobotContainer {
     SmartDashboard.putNumber("front cam angle to goal", LimeLight.front.getLatest().tx);
     SmartDashboard.putNumber("angle target", this.drivetrain.targetHeading().getDegrees());
 
-    try {
-      LimelightHelpers.SetRobotOrientation("limelight",
-          this.drivetrain.getState().Pose.getRotation().getDegrees(),
-          0, 0, 0, 0, 0);
+    LimeLight.front.setRobotOrientation(this.drivetrain.getState().Pose.getRotation());
 
+    try {
       boolean reject = false;
       LimelightHelpers.PoseEstimate llPose = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-front");
 

@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.EnumSet;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTable.TableEventListener;
 import edu.wpi.first.networktables.NetworkTableEvent.Kind;
@@ -39,6 +40,11 @@ public class LimeLight extends SubsystemBase {
 
     public void setPriorityTag(int id) {
         this.priorityID = id;
+    }
+
+    public void setRobotOrientation(Rotation2d direction) {
+        LimelightHelpers.SetRobotOrientation(
+                this.name, direction.getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0);
     }
 
     private class Listener implements TableEventListener {
