@@ -6,23 +6,22 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTable.TableEventListener;
 import edu.wpi.first.networktables.NetworkTableEvent.Kind;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.LimelightResults;
+import frc.robot.LimelightHelpers.LimelightTarget_Fiducial;
 
 public class LimeLight extends SubsystemBase {
 
-    private static LimeLight instance;
+    public static final LimeLight front = new LimeLight("limelight-front");
 
-    public static LimeLight getInstance() {
-        if (instance == null) {
-            return instance = new LimeLight();
-        } else {
-            return instance;
-        }
+    private String name;
+    private int priorityID;
+
+    private LimeLight(String nm) {
+        this.name = nm;
     }
 
     public static class VisionResult {
@@ -38,27 +37,29 @@ public class LimeLight extends SubsystemBase {
         return this.latestResult;
     }
 
+    public void setPriorityTag(int id) {
+        this.priorityID = id;
+    }
+
     private class Listener implements TableEventListener {
+
         public void accept(NetworkTable table, String key, NetworkTableEvent event) {
             if (key.equals("json")) {
                 double before = Timer.getFPGATimestamp();
-                LimelightResults llResult = LimelightHelpers.getLatestResults("limelight-front");
+                LimelightResults llResult = LimelightHelpers.getLatestResults(LimeLight.this.name);
                 VisionResult vr = new VisionResult();
 
                 vr.timestamp = before - llResult.latency_pipeline / 1000.0 - llResult.latency_capture / 1000.0;
 
-                if (llResult.targets_Fiducials.length > 0) {
-                    vr.tx = llResult.targets_Fiducials[0].tx;
-                    vr.ty = llResult.targets_Fiducials[0].ty;
-                    vr.valid = llResult.valid;
-                } else {
-                    vr.tx = 0;
-                    vr.ty = 0;
-                    vr.valid = false;
+                for (LimelightTarget_Fiducial fiducial : llResult.targets_Fiducials) {
+                    if (fiducial.fiducialID == LimeLight.this.priorityID) {
+                        vr.tx = fiducial.tx;
+                        vr.ty = fiducial.ty;
+                        vr.valid = true;
+                    }
                 }
 
                 latestResult = vr;
-
             }
         }
     }
@@ -67,7 +68,7 @@ public class LimeLight extends SubsystemBase {
 
     public synchronized void start() {
         if (m_listenerID < 0) {
-            m_listenerID = NetworkTableInstance.getDefault().getTable("limelight-front").addListener("json",
+            m_listenerID = NetworkTableInstance.getDefault().getTable(this.name).addListener("json",
                     EnumSet.of(Kind.kValueAll), new Listener());
         }
     }

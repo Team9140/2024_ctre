@@ -24,12 +24,10 @@ public class Robot extends TimedRobot {
   SendableChooser<String> startSpot = new SendableChooser<>();
   // PowerDistribution pd = new PowerDistribution(0, ModuleType.kRev);
 
-  
-  public final LimeLight LL = LimeLight.getInstance();
 
   @Override
   public void robotInit() {
-    LL.start();
+    LimeLight.front.start();
     
     // pd.setSwitchableChannel(true);
     m_robotContainer = new RobotContainer();
@@ -103,8 +101,10 @@ public class Robot extends TimedRobot {
     if (DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue)
         .equals(DriverStation.Alliance.Blue)) {
           m_robotContainer.drivetrain.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
+          LimeLight.front.setPriorityTag(7);
     } else {
       m_robotContainer.drivetrain.setOperatorPerspectiveForward(Rotation2d.fromDegrees(180));
+      LimeLight.front.setPriorityTag(3);
     }
   }
 

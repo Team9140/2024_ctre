@@ -42,8 +42,6 @@ public class RobotContainer {
   public final Arm arm = Arm.getInstance();
   public final Cantdle lamp = Cantdle.getInstance();
 
-  public final LimeLight LL = LimeLight.getInstance();
-
   // configure yeet mode by commenting one or the other
 
   private final Yeeter thrower = Yeeter.getInstance();
@@ -182,7 +180,7 @@ public class RobotContainer {
   Field2d f = new Field2d();
 
   public void periodic() {
-    SmartDashboard.putNumber("angle to goal", CameraVision.frontCamAngleToGoal().orElseGet(() -> 0.0));
+    SmartDashboard.putNumber("front cam angle to goal", LimeLight.front.getLatest().tx);
     SmartDashboard.putNumber("angle target", this.drivetrain.targetHeading().getDegrees());
 
     try {
