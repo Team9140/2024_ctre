@@ -6,10 +6,10 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,15 +20,14 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
- 
+
   SendableChooser<String> startSpot = new SendableChooser<>();
   // PowerDistribution pd = new PowerDistribution(0, ModuleType.kRev);
-
 
   @Override
   public void robotInit() {
     LimeLight.front.start();
-    
+
     // pd.setSwitchableChannel(true);
     m_robotContainer = new RobotContainer();
 
@@ -98,12 +97,14 @@ public class Robot extends TimedRobot {
     }
 
     SignalLogger.start();
-    if (DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue)
-        .equals(DriverStation.Alliance.Blue)) {
-          m_robotContainer.drivetrain.setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
-          LimeLight.front.setPriorityTag(7);
+
+    // default to Blue Alliance
+    Alliance ally = DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue);
+    m_robotContainer.drivetrain.setAlliance(ally);
+
+    if (ally.equals(DriverStation.Alliance.Blue)) {
+      LimeLight.front.setPriorityTag(7);
     } else {
-      m_robotContainer.drivetrain.setOperatorPerspectiveForward(Rotation2d.fromDegrees(180));
       LimeLight.front.setPriorityTag(3);
     }
   }

@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -57,6 +58,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     private DriveMode activeMode = DriveMode.FIELD_CENTRIC_DRIVE;
 
+    private Alliance alliance = Alliance.Blue;
+
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
 
@@ -67,9 +70,16 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         green_gyro = new ADIS16470_IMU();
 
         this.headingController.enableContinuousInput(-Math.PI, Math.PI);
-        ampDrive.HeadingController = this.headingController;
-        underhandSpeakerDrive.HeadingController.setPID(30.0, 0.0, 1.0);
-        underhandSpeakerDrive.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+        this.ampDrive.HeadingController = this.headingController;
+        this.underhandSpeakerDrive.HeadingController = this.headingController;
+
+        this.fieldCentricDrive.ForwardReference = ForwardReference.RedAlliance;
+        this.ampDrive.ForwardReference = ForwardReference.RedAlliance;
+        this.underhandSpeakerDrive.ForwardReference = ForwardReference.RedAlliance;
+    }
+
+    public void setAlliance(Alliance a) {
+        this.alliance = a;
     }
 
     private static final double kBufferDuration = 1.5;
@@ -102,6 +112,13 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             double leftY = Util.applyDeadband(-leftStickY.getAsDouble());
             double rightX = Util.applyDeadband(-rightStickX.getAsDouble());
 
+            // flip direction of sticks if Red, this allows coordinate system to always be same
+            // rotation is always CCW positive
+            if (this.alliance == Alliance.Red) {
+                leftX *= -1;
+                leftY *= -1;
+            }
+
             SmartDashboard.putString("drive mode", activeMode.name());
             switch (activeMode) {
                 case UNDERHAND_SPEAKER_DRIVE:
@@ -120,8 +137,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                             .withVelocityY(
                                     leftX * Constants.Drive.MAX_SPEED_MPS * Constants.Drive.AMP_SLOWDOWN_SCALAR)
                             .withTargetDirection(
-                                    Rotation2d.fromDegrees(-90 + rightX * Constants.Drive.AMP_ANGLE_ADJUST_DEG)
-                                            .rotateBy(m_operatorForwardDirection)));
+                                    Rotation2d.fromDegrees(-90 + rightX * Constants.Drive.AMP_ANGLE_ADJUST_DEG)));
                     break;
                 case FIELD_CENTRIC_DRIVE:
                     // intentional fall through
