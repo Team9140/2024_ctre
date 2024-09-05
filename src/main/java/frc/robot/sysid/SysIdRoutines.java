@@ -10,6 +10,7 @@ import frc.robot.generated.TunerConstants;
 public class SysIdRoutines {
     private final SwerveRequest.SysIdSwerveTranslation SysIDTranslate = new SwerveRequest.SysIdSwerveTranslation();
 
+    @SuppressWarnings("unused")
     private SysIdRoutine translateRoutine = new SysIdRoutine(
             new SysIdRoutine.Config(
                     null,
@@ -23,6 +24,7 @@ public class SysIdRoutines {
 
     private final SwerveRequest.SysIdSwerveRotation SysIDRotate = new SwerveRequest.SysIdSwerveRotation();
 
+    @SuppressWarnings("unused")
     private SysIdRoutine rotateRoutine = new SysIdRoutine(
             new SysIdRoutine.Config(
                     null,
@@ -36,6 +38,7 @@ public class SysIdRoutines {
 
     private final SwerveRequest.SysIdSwerveSteerGains SysIDSteer = new SwerveRequest.SysIdSwerveSteerGains();
 
+    @SuppressWarnings("unused")
     private SysIdRoutine steerRoutine = new SysIdRoutine(
             new SysIdRoutine.Config(
                     null,
