@@ -33,6 +33,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.Yeeter;
+import frc.robot.subsystems.CommandSwerveDrivetrain.DriveMode;
 
 public class RobotContainer {
 
@@ -55,55 +56,15 @@ public class RobotContainer {
   }
 
   private double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
-  private double MaxAngularRate = 3.0 * Math.PI; // 1.5 rotation per second max angular velocity
 
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
 
-  private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-      .withDeadband(MaxSpeed * 0.01).withRotationalDeadband(MaxAngularRate * 0.01)
-      .withDriveRequestType(DriveRequestType.Velocity);
   private final Telemetry logger = new Telemetry(MaxSpeed);
-
-  SwerveRequest.FieldCentricFacingAngle uhh = new SwerveRequest.FieldCentricFacingAngle().withDeadband(MaxSpeed * 0.01)
-      .withRotationalDeadband(MaxAngularRate * 0.06)
-      .withDriveRequestType(DriveRequestType.Velocity);
-
-  SwerveRequest.FieldCentricFacingAngle faceBlueSpeaker = new SwerveRequest.FieldCentricFacingAngle()
-      .withDeadband(MaxSpeed * 0.01)
-      .withRotationalDeadband(MaxAngularRate * 0.06)
-      .withDriveRequestType(DriveRequestType.Velocity);
-
-  private final static double deadband = 0.12;
-
-  private final double applyDeadband(double in) {
-    if (Math.abs(in) < deadband) {
-      return 0.0;
-    } else if (in > 0) {
-      return (in - deadband) / (1.0 - deadband);
-    } else {
-      return (in + deadband) / (1.0 - deadband);
-    }
-  }
-
   Trigger FMSconnect = new Trigger(DriverStation::isEnabled);
 
   private void configureBindings() {
-    drivetrain.setDefaultCommand(
-        drivetrain.applyRequest(() -> drive.withVelocityX(applyDeadband(-joystick.getLeftY()) * MaxSpeed)
-            .withVelocityY(applyDeadband(-joystick.getLeftX()) * MaxSpeed)
-            .withRotationalRate(applyDeadband(-joystick.getRightX()) * MaxAngularRate)));
-
-    faceBlueSpeaker.HeadingController.setPID(30.0, 0, 1.0);
-    faceBlueSpeaker.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
-
-    this.joystick.leftTrigger().whileTrue(
-        this.drivetrain
-            .applyRequest(
-                () -> this.faceBlueSpeaker.withVelocityX(applyDeadband(-joystick.getLeftY()) * MaxSpeed * 0.75)
-                    .withVelocityY(applyDeadband(-joystick.getLeftX()) * MaxSpeed * 0.75)
-                    .withRotationalDeadband(0.1 * MaxAngularRate)
-                    .withTargetDirection(this.drivetrain.targetHeading())));
+    drivetrain.setDefaultCommand(drivetrain.teleopDrive(joystick::getLeftX, joystick::getLeftY, joystick::getRightX));
 
     joystick.start().onTrue(drivetrain.runOnce(() -> {
       Pose2d currentPose = this.drivetrain.getState().Pose;
@@ -131,8 +92,10 @@ public class RobotContainer {
     this.joystick.a().onTrue(
         this.thrower.prepareSpeaker()
             .alongWith(this.intake.off())
-
-    );
+            .alongWith(this.drivetrain.setDriveMode(DriveMode.UNDERHAND_SPEAKER_DRIVE)))
+        .whileTrue(new RunCommand(() -> {
+          this.arm.setAngleDumb(CameraVision.getUnderhandAngle());
+        }, this.arm));
 
     this.joystick.y().onTrue(
         this.arm.setOverhand()
@@ -142,7 +105,8 @@ public class RobotContainer {
     );
 
     this.joystick.b().onTrue(
-        this.arm.setAmp()
+        this.drivetrain.setDriveMode(DriveMode.AMP_DRIVE)
+            .alongWith(this.arm.setAmp())
             .alongWith(this.thrower.prepareAmp())
             .alongWith(this.intake.off()));
 
@@ -158,30 +122,32 @@ public class RobotContainer {
         .onTrue(
             this.intake.intakeNote()
                 .alongWith(this.arm.setIntake())
-                .alongWith(this.thrower.setIntake()))
+                .alongWith(this.thrower.setIntake())
+                .alongWith(this.drivetrain.setDriveMode(DriveMode.FIELD_CENTRIC_DRIVE)))
         .onFalse(this.intake.off().alongWith(this.arm.setStow()).alongWith(this.thrower.hold()));
 
     this.joystick.leftBumper().onTrue(this.thrower.eject()).onFalse(this.thrower.off());
 
     // Throw note
     this.joystick.rightTrigger()
-        // .onTrue(this.thrower.launch())
-        .onTrue(new ConditionalCommand(
-            new SequentialCommandGroup(
-                this.thrower.launch(),
-                new WaitCommand(0.15),
-                this.arm.setAngle(Constants.Arm.Positions.AMP - 0.15),
-                new WaitCommand(0.15),
-                this.arm.setAngle(Constants.Arm.Positions.AMP - 0.3),
-                new WaitCommand(0.35),
-                this.thrower.off(),
-                this.arm.setStow()),
-            new SequentialCommandGroup(
-                this.thrower.launch(),
-                new WaitCommand(0.5),
-                this.thrower.off(),
-                this.arm.setStow()),
-            arm::isAmping));
+        .onTrue(
+            new ConditionalCommand(
+                new SequentialCommandGroup(
+                    this.thrower.launch(),
+                    new WaitCommand(0.15),
+                    this.arm.setAngle(Constants.Arm.Positions.AMP - 0.15),
+                    new WaitCommand(0.15),
+                    this.arm.setAngle(Constants.Arm.Positions.AMP - 0.3),
+                    new WaitCommand(0.35),
+                    this.thrower.off(),
+                    this.arm.setStow()),
+                new SequentialCommandGroup(
+                    this.thrower.launch(),
+                    new WaitCommand(0.5),
+                    this.thrower.off(),
+                    this.arm.setStow()),
+                arm::isAmping)
+                .andThen(this.drivetrain.setDriveMode(DriveMode.FIELD_CENTRIC_DRIVE)));
 
     this.thrower.hasNote
         .onTrue(new InstantCommand(() -> this.joystick.getHID().setRumble(RumbleType.kBothRumble, 0.6))
@@ -216,11 +182,8 @@ public class RobotContainer {
   Field2d f = new Field2d();
 
   public void periodic() {
-    SmartDashboard.putBoolean("continuous?", faceBlueSpeaker.HeadingController.isContinuousInputEnabled());
     SmartDashboard.putNumber("angle to goal", CameraVision.frontCamAngleToGoal().orElseGet(() -> 0.0));
     SmartDashboard.putNumber("angle target", this.drivetrain.targetHeading().getDegrees());
-    SmartDashboard.putNumber("angle target 2", Math.toDegrees(faceBlueSpeaker.HeadingController.getSetpoint()));
-    SmartDashboard.putNumber("angle target 3", faceBlueSpeaker.TargetDirection.getDegrees());
 
     try {
       LimelightHelpers.SetRobotOrientation("limelight",

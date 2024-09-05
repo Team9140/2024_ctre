@@ -1,28 +1,75 @@
 package frc.robot.subsystems;
 
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.utility.PhoenixPIDController;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
+import edu.wpi.first.wpilibj.ADIS16470_IMU;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants;
+import frc.robot.Util;
 import frc.robot.subsystems.LimeLight.VisionResult;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
-import edu.wpi.first.units.Units;
 
 public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsystem {
+
+    private ADIS16470_IMU green_gyro;
+
+    private final SwerveRequest.FieldCentric fieldCentricDrive = new SwerveRequest.FieldCentric()
+            .withDeadband(Constants.Drive.MIN_TRANSLATE_MPS)
+            .withRotationalDeadband(Constants.Drive.MIN_ROTATE_RPS)
+            .withDriveRequestType(DriveRequestType.Velocity);
+
+    private final SwerveRequest.FieldCentricFacingAngle ampDrive = new SwerveRequest.FieldCentricFacingAngle()
+            .withDeadband(Constants.Drive.MIN_TRANSLATE_MPS)
+            .withRotationalDeadband(Constants.Drive.MIN_ROTATE_RPS)
+            .withDriveRequestType(DriveRequestType.Velocity)
+            .withTargetDirection(Rotation2d.fromDegrees(-90.0));
+
+    private final SwerveRequest.FieldCentricFacingAngle underhandSpeakerDrive = new SwerveRequest.FieldCentricFacingAngle()
+            .withDeadband(Constants.Drive.MIN_TRANSLATE_MPS)
+            .withRotationalDeadband(Constants.Drive.MIN_ROTATE_RPS)
+            .withDriveRequestType(DriveRequestType.Velocity);
+
+    private final PhoenixPIDController headingController = new PhoenixPIDController(30.0, 0.0, 1.0);
+
+    public enum DriveMode {
+        FIELD_CENTRIC_DRIVE,
+        AMP_DRIVE,
+        UNDERHAND_SPEAKER_DRIVE;
+    }
+
+    private DriveMode activeMode = DriveMode.FIELD_CENTRIC_DRIVE;
+
+    public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
+        super(driveTrainConstants, modules);
+
+        if (Utils.isSimulation()) {
+            startSimThread();
+        }
+
+        green_gyro = new ADIS16470_IMU();
+
+        this.headingController.enableContinuousInput(-Math.PI, Math.PI);
+        ampDrive.HeadingController = this.headingController;
+        underhandSpeakerDrive.HeadingController.setPID(30.0, 0.0, 1.0);
+        underhandSpeakerDrive.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+    }
 
     private static final double kBufferDuration = 1.5;
     private final TimeInterpolatableBuffer<Rotation2d> m_HeadingBuffer = TimeInterpolatableBuffer
@@ -38,7 +85,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             return Rotation2d.fromDegrees(180.0);
         }
         Optional<Rotation2d> oldHeading = sampleHeading(res.timestamp);
-        
+
         if (oldHeading.isPresent()) {
             SmartDashboard.putNumber("old heading", oldHeading.get().getDegrees());
             return oldHeading.get().plus(Rotation2d.fromDegrees(-res.tx));
@@ -47,92 +94,87 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
     }
 
-    private static final double kSimLoopPeriod = 0.005; // 5 ms
-    private Notifier m_simNotifier = null;
-    private double m_lastSimTime;
-    // ADIS16470_IMU green_gyro;
+    public Command teleopDrive(DoubleSupplier leftStickX, DoubleSupplier leftStickY, DoubleSupplier rightStickX) {
+        return this.run(() -> {
 
-    private final SwerveRequest.SysIdSwerveTranslation SysIDTranslate = new SwerveRequest.SysIdSwerveTranslation();
+            double leftX = Util.applyDeadband(-leftStickX.getAsDouble());
+            double leftY = Util.applyDeadband(-leftStickY.getAsDouble());
+            double rightX = Util.applyDeadband(-rightStickX.getAsDouble());
 
-    private SysIdRoutine translateRoutine = new SysIdRoutine(
-            new SysIdRoutine.Config(
-                    null,
-                    Units.Volts.of(4),
-                    null,
-                    (state) -> SignalLogger.writeString("state", state.toString())),
-            new SysIdRoutine.Mechanism(
-                    (volts) -> setControl(SysIDTranslate.withVolts(volts)),
-                    null,
-                    this));
-
-    private final SwerveRequest.SysIdSwerveRotation SysIDRotate = new SwerveRequest.SysIdSwerveRotation();
-
-    private SysIdRoutine rotateRoutine = new SysIdRoutine(
-            new SysIdRoutine.Config(
-                    null,
-                    Units.Volts.of(4),
-                    null,
-                    (state) -> SignalLogger.writeString("state", state.toString())),
-            new SysIdRoutine.Mechanism(
-                    (volts) -> setControl(SysIDRotate.withVolts(volts)),
-                    null,
-                    this));
-
-    private final SwerveRequest.SysIdSwerveSteerGains SysIDSteer = new SwerveRequest.SysIdSwerveSteerGains();
-
-    private SysIdRoutine steerRoutine = new SysIdRoutine(
-            new SysIdRoutine.Config(
-                    null,
-                    Units.Volts.of(4),
-                    null,
-                    (state) -> SignalLogger.writeString("state", state.toString())),
-            new SysIdRoutine.Mechanism(
-                    (volts) -> setControl(SysIDSteer.withVolts(volts)),
-                    null,
-                    this));
-
-    private final SysIdRoutine routineToApply = translateRoutine;
-
-    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return routineToApply.quasistatic(direction);
+            SmartDashboard.putString("drive mode", activeMode.name());
+            switch (activeMode) {
+                case UNDERHAND_SPEAKER_DRIVE:
+                    this.setControl(underhandSpeakerDrive
+                            .withVelocityX(
+                                    leftY * Constants.Drive.MAX_SPEED_MPS * Constants.Drive.SPEAK_SLOWDOWN_SCALAR)
+                            .withVelocityY(
+                                    leftX * Constants.Drive.MAX_SPEED_MPS * Constants.Drive.SPEAK_SLOWDOWN_SCALAR)
+                            .withTargetDirection(
+                                    this.targetHeading()));
+                    break;
+                case AMP_DRIVE:
+                    this.setControl(ampDrive
+                            .withVelocityX(
+                                    leftY * Constants.Drive.MAX_SPEED_MPS * Constants.Drive.AMP_SLOWDOWN_SCALAR)
+                            .withVelocityY(
+                                    leftX * Constants.Drive.MAX_SPEED_MPS * Constants.Drive.AMP_SLOWDOWN_SCALAR)
+                            .withTargetDirection(
+                                    Rotation2d.fromDegrees(-90 + rightX * Constants.Drive.AMP_ANGLE_ADJUST_DEG)
+                                            .rotateBy(m_operatorForwardDirection)));
+                    break;
+                case FIELD_CENTRIC_DRIVE:
+                    // intentional fall through
+                default:
+                    this.setControl(fieldCentricDrive
+                            .withVelocityX(leftY * Constants.Drive.MAX_SPEED_MPS)
+                            .withVelocityY(leftX * Constants.Drive.MAX_SPEED_MPS)
+                            .withRotationalRate(rightX * Constants.Drive.MAX_ROTATION_RATE_RPS));
+                    break;
+            }
+        });
     }
 
-    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return routineToApply.dynamic(direction);
+    public Command setDriveMode(DriveMode newMode) {
+        return this.runOnce(() -> this.activeMode = newMode);
     }
 
-    public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency,
-            SwerveModuleConstants... modules) {
-        super(driveTrainConstants, OdometryUpdateFrequency, modules);
-        if (Utils.isSimulation()) {
-            startSimThread();
-        }
-
-        // green_gyro = new ADIS16470_IMU();
-        // this.m_pigeon2.getConfigurator().apply(new
-        // GyroTrimConfigs().withGyroScalarZ(OdometryUpdateFrequency))
-
+    /**
+     * Command to reset Pigeon and Analog Devices gyro internal yaw angle to 0.
+     * 
+     */
+    public Command resetGyros() {
+        return this.resetGyros(0.0);
     }
 
-    public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
-        super(driveTrainConstants, modules);
-        if (Utils.isSimulation()) {
-            startSimThread();
-        }
-
-        // green_gyro = new ADIS16470_IMU();
+    /**
+     * Command to reset Pigeon and Analog Devices gyro internal yaw angle to
+     * specified angle.
+     * 
+     */
+    public Command resetGyros(double angle) {
+        return this.runOnce(() -> {
+            green_gyro.setGyroAngleZ(angle);
+            m_pigeon2.setYaw(angle);
+        });
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
-        return run(() -> this.setControl(requestSupplier.get()));
+        return this.run(() -> this.setControl(requestSupplier.get()));
     }
 
     @Override
     public void periodic() {
+
+        if (DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue)
+                .equals(DriverStation.Alliance.Blue)) {
+            setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
+        } else {
+            setOperatorPerspectiveForward(Rotation2d.fromDegrees(180));
+        }
         SmartDashboard.putNumber("pigeon yaw", this.m_pigeon2.getYaw().getValueAsDouble());
-        // SmartDashboard.putNumber("green yaw", this.green_gyro.getAngle());
-        // SmartDashboard.putNumber("diff", this.m_pigeon2.getYaw().getValueAsDouble() -
-        // this.green_gyro.getAngle());
+        SmartDashboard.putNumber("green yaw", this.green_gyro.getAngle());
+        SmartDashboard.putNumber("diff", this.m_pigeon2.getYaw().getValueAsDouble() -
+                this.green_gyro.getAngle());
         SmartDashboard.putNumber("steer angle reference",
                 this.Modules[0].getSteerMotor().getClosedLoopReference().getValueAsDouble() % (Math.PI * 2.0));
         SmartDashboard.putNumber("steer angle",
@@ -149,8 +191,21 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         SmartDashboard.putNumber("wheel current",
                 this.Modules[0].getDriveMotor().getStatorCurrent().getValueAsDouble());
 
+        SmartDashboard.putNumber("drive angle", this.ampDrive.TargetDirection.getDegrees());
+        SmartDashboard.putNumber("drive angle 2", Math.toDegrees(this.ampDrive.HeadingController.getSetpoint()));
+
         m_HeadingBuffer.addSample(Timer.getFPGATimestamp(), this.getState().Pose.getRotation());
     }
+
+    /**
+     * 
+     * simulation
+     * 
+     */
+
+    private static final double kSimLoopPeriod = 0.005; // 5 ms
+    private Notifier m_simNotifier = null;
+    private double m_lastSimTime;
 
     private void startSimThread() {
         m_lastSimTime = Utils.getCurrentTimeSeconds();
@@ -165,12 +220,5 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             updateSimState(deltaTime, RobotController.getBatteryVoltage());
         });
         m_simNotifier.startPeriodic(kSimLoopPeriod);
-    }
-
-    public Command resetGyros() {
-        return this.runOnce(() -> {
-            // green_gyro.setGyroAngleZ(0.0);
-            m_pigeon2.setYaw(0.0);
-        });
     }
 }
