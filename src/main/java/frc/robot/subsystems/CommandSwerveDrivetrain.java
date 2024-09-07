@@ -112,13 +112,15 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             double leftY = Util.applyDeadband(-leftStickY.getAsDouble());
             double rightX = Util.applyDeadband(-rightStickX.getAsDouble());
 
-            // flip direction of sticks if Red, this allows coordinate system to always be same
+            // flip direction of sticks if Red, this allows coordinate system to always be
+            // same
             // rotation is always CCW positive
             if (this.alliance == Alliance.Red) {
                 leftX *= -1;
                 leftY *= -1;
             }
 
+            SmartDashboard.putNumber("left stick", leftX);
             SmartDashboard.putString("drive mode", activeMode.name());
             switch (activeMode) {
                 case UNDERHAND_SPEAKER_DRIVE:
@@ -152,7 +154,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     public Command setDriveMode(DriveMode newMode) {
-        return this.runOnce(() -> this.activeMode = newMode);
+        return this.runOnce(() -> this.activeMode = newMode).asProxy();
     }
 
     /**

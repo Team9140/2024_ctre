@@ -32,7 +32,7 @@ public class LimeLight extends SubsystemBase {
         public boolean valid;
     }
 
-    private volatile VisionResult latestResult = null;
+    private volatile VisionResult latestResult = new VisionResult();
 
     public VisionResult getLatest() {
         return this.latestResult;

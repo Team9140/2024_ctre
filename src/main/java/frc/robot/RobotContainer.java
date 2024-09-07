@@ -4,11 +4,9 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -46,17 +44,14 @@ public class RobotContainer {
 
   // end configure yeet mode
 
+  private final Field2d f = new Field2d();
+  private final CommandXboxController joystick = new CommandXboxController(0);
+  private final Telemetry logger = new Telemetry(TunerConstants.kSpeedAt12VoltsMps);
+  private final Trigger FMSconnect = new Trigger(DriverStation::isEnabled);
+
   public RobotContainer() {
     configureBindings();
   }
-
-  private double MaxSpeed = TunerConstants.kSpeedAt12VoltsMps; // kSpeedAt12VoltsMps desired top speed
-
-  /* Setting up bindings for necessary control of the swerve drive platform */
-  private final CommandXboxController joystick = new CommandXboxController(0); // My joystick
-
-  private final Telemetry logger = new Telemetry(MaxSpeed);
-  Trigger FMSconnect = new Trigger(DriverStation::isEnabled);
 
   private void configureBindings() {
     drivetrain.setDefaultCommand(drivetrain.teleopDrive(joystick::getLeftX, joystick::getLeftY, joystick::getRightX));
@@ -71,33 +66,16 @@ public class RobotContainer {
       }
     }));
 
-    // this.joystick.leftTrigger().whileTrue(new RunCommand(() -> {
-    // this.arm.setAngleDumb(CameraVision.getUnderhandAngle());
-    // }, this.arm));
-
-    if (Utils.isSimulation()) {
-      drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
-    }
-
-    // this.joystick.a().whileTrue(thrower.YeeterRoutine.dynamic(Direction.kForward));
-    // this.joystick.b().whileTrue(thrower.YeeterRoutine.dynamic(Direction.kReverse));
-    // this.joystick.x().whileTrue(thrower.YeeterRoutine.quasistatic(Direction.kForward));
-    // this.joystick.y().whileTrue(thrower.YeeterRoutine.quasistatic(Direction.kReverse));
-
     this.joystick.a().onTrue(
-        this.thrower.prepareSpeaker()
-            .alongWith(this.intake.off())
-            .alongWith(this.drivetrain.setDriveMode(DriveMode.UNDERHAND_SPEAKER_DRIVE))
-            .andThen(new RunCommand(() -> {
-              this.arm.setAngleDumb(CameraVision.getUnderhandAngle());
-            }, this.arm)));
+        this.drivetrain.setDriveMode(DriveMode.UNDERHAND_SPEAKER_DRIVE)
+        .alongWith(this.thrower.prepareSpeaker())
+        .alongWith(this.intake.off())
+        .alongWith(this.arm.trackAngle(CameraVision::getUnderhandAngle)));
 
     this.joystick.y().onTrue(
         this.arm.setOverhand()
             .alongWith(this.thrower.prepareSpeaker())
-            .alongWith(this.intake.off())
-
-    );
+            .alongWith(this.intake.off()));
 
     this.joystick.b().onTrue(
         this.drivetrain.setDriveMode(DriveMode.AMP_DRIVE)
@@ -108,9 +86,7 @@ public class RobotContainer {
     this.joystick.x().onTrue(
         this.arm.setStow()
             .alongWith(this.intake.off())
-            .alongWith(this.thrower.off())
-
-    );
+            .alongWith(this.thrower.off()));
 
     // Intake Note
     this.joystick.rightBumper()
@@ -121,44 +97,40 @@ public class RobotContainer {
                 .alongWith(this.drivetrain.setDriveMode(DriveMode.FIELD_CENTRIC_DRIVE)))
         .onFalse(this.intake.off().alongWith(this.arm.setStow()).alongWith(this.thrower.hold()));
 
+    // Eject stuck Note
     this.joystick.leftBumper().onTrue(this.thrower.eject()).onFalse(this.thrower.off());
 
     // Throw note
     this.joystick.rightTrigger()
         .onTrue(
-            new ConditionalCommand(
-                new SequentialCommandGroup(
-                    this.thrower.launch(),
-                    new WaitCommand(0.15),
-                    this.arm.setAngle(Constants.Arm.Positions.AMP - 0.15),
-                    new WaitCommand(0.15),
-                    this.arm.setAngle(Constants.Arm.Positions.AMP - 0.3),
-                    new WaitCommand(0.35),
-                    this.thrower.off(),
-                    this.arm.setStow()),
-                new SequentialCommandGroup(
-                    this.thrower.launch(),
-                    new WaitCommand(0.5),
-                    this.thrower.off(),
-                    this.arm.setStow()),
-                arm::isAmping)
+            this.thrower.launch()
+                .andThen(
+                    new ConditionalCommand(
+                        this.arm.setStowSlow(),
+                        new SequentialCommandGroup(
+                            new WaitCommand(0.5),
+                            this.arm.setStow()),
+                        arm::isAmping))
+                .andThen(this.thrower.off())
                 .andThen(this.drivetrain.setDriveMode(DriveMode.FIELD_CENTRIC_DRIVE)));
 
+    // driver feedback
     this.thrower.hasNote
         .onTrue(new InstantCommand(() -> this.joystick.getHID().setRumble(RumbleType.kBothRumble, 0.6))
             .alongWith(this.lamp.flashColor(Cantdle.ORANGE, 1.0)))
         .onFalse(new InstantCommand(() -> this.joystick.getHID().setRumble(RumbleType.kBothRumble, 0.0)));
-
     this.thrower.ready.onTrue(this.lamp.flashColor(Cantdle.GREEN, 0.5));
-
     FMSconnect.onTrue(this.lamp.flashColor(Cantdle.PURPLE, 2.5));
-
-    // this.driverController.start().onTrue(this.drive.toggleFieldRelative());
 
     // this.joystick.y().whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
     // this.joystick.x().whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
     // this.joystick.a().whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
     // this.joystick.b().whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+
+    // this.joystick.a().whileTrue(thrower.YeeterRoutine.dynamic(Direction.kForward));
+    // this.joystick.b().whileTrue(thrower.YeeterRoutine.dynamic(Direction.kReverse));
+    // this.joystick.x().whileTrue(thrower.YeeterRoutine.quasistatic(Direction.kForward));
+    // this.joystick.y().whileTrue(thrower.YeeterRoutine.quasistatic(Direction.kReverse));
 
     drivetrain.registerTelemetry(logger::telemeterize);
   }
@@ -173,8 +145,6 @@ public class RobotContainer {
         new WaitCommand(1.0),
         this.arm.setIntake().alongWith(this.thrower.off()));
   }
-
-  Field2d f = new Field2d();
 
   public void periodic() {
     SmartDashboard.putNumber("front cam angle to goal", LimeLight.front.getLatest().tx);
