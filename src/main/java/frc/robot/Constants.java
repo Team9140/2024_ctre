@@ -151,6 +151,10 @@ public final class Constants {
 
     public static final double SPEAK_SLOWDOWN_SCALAR = 0.5;
     public static final double SPEAK_ANGLE_ADJUST_DEG = 45.0;
+
+    public static final double kPXController = 4.0;
+    public static final double kPYController = 4;
+    public static final double kPThetaController = 30.0;
   }
 
   /**
@@ -250,8 +254,8 @@ public final class Constants {
   }
 
   public static final class Camera {
-    public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(16);
-    public static final double CAMERA_PITCH_RADS = Units.degreesToRadians(45);
+    // public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(16);
+    // public static final double CAMERA_PITCH_RADS = Units.degreesToRadians(45);
     public static final AprilTagFieldLayout field = null; // FIXME: add json file
 
     // Position of camera relative to the robot
@@ -259,10 +263,10 @@ public final class Constants {
   }
 
   public static final class Yeeter {
-    public static final double MOTOR_ROLLER_RATIO = 42.0 / 21.0;
-    public static final double INTAKE_RPS = -4000.0 / 60.0 / MOTOR_ROLLER_RATIO; // divide by 60 for RPM
+    public static final double MOTOR_ROLLER_RATIO = 32.0 / 21.0;
+    public static final double INTAKE_RPS = -2000.0 / 60.0 / MOTOR_ROLLER_RATIO; // divide by 60 for RPM
     public static final double AMP_RPS = 800.0 / 60.0 / MOTOR_ROLLER_RATIO;
-    public static final double LEFT_SPEAKER_RPS = 6750.0 / 60.0 / MOTOR_ROLLER_RATIO;
+    public static final double LEFT_SPEAKER_RPS = 8500.0 / 60.0 / MOTOR_ROLLER_RATIO;
     public static final double RIGHT_SPEAKER_RPS = 5500.0 / 60.0 / MOTOR_ROLLER_RATIO;
   }
 

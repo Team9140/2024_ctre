@@ -93,7 +93,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public Rotation2d targetHeading() {
         VisionResult res = LimeLight.front.getLatest();
         if (res == null || !res.valid) {
-            return Rotation2d.fromDegrees(180.0);
+            if (this.alliance == Alliance.Blue) {
+                return Rotation2d.fromDegrees(180.0);
+            } else {
+                return Rotation2d.fromDegrees(0.0);
+            }
+            
         }
         Optional<Rotation2d> oldHeading = sampleHeading(res.timestamp);
 
@@ -184,12 +189,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     @Override
     public void periodic() {
 
-        if (DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue)
-                .equals(DriverStation.Alliance.Blue)) {
-            setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
-        } else {
-            setOperatorPerspectiveForward(Rotation2d.fromDegrees(180));
-        }
+        // if (DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue)
+        //         .equals(DriverStation.Alliance.Blue)) {
+        //     setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
+        // } else {
+        //     setOperatorPerspectiveForward(Rotation2d.fromDegrees(180));
+        // }
         SmartDashboard.putNumber("pigeon yaw", this.m_pigeon2.getYaw().getValueAsDouble());
         SmartDashboard.putNumber("green yaw", this.green_gyro.getAngle());
         SmartDashboard.putNumber("diff", this.m_pigeon2.getYaw().getValueAsDouble() -

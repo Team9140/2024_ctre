@@ -6,9 +6,9 @@ package frc.robot;
 
 import com.ctre.phoenix6.SignalLogger;
 
-import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,6 +27,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     LimeLight.front.start();
+    LimeLight.back.start();
 
     // pd.setSwitchableChannel(true);
     m_robotContainer = new RobotContainer();
@@ -35,9 +36,9 @@ public class Robot extends TimedRobot {
 
     SignalLogger.setPath("/media/sda");
 
-    for (int port = 5800; port <= 5809; port++) {
-      PortForwarder.add(port, "limelight.local", port);
-    }
+    // for (int port = 5800; port <= 5809; port++) {
+    //   PortForwarder.add(port, "limelight.local", port);
+    // }
 
     startSpot.addOption("amp", "amp");
     startSpot.setDefaultOption("center", "center");
@@ -45,10 +46,9 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putData(startSpot);
 
-    LimelightHelpers.setPipelineIndex("limelight", 0);
-    LimelightHelpers.SetFiducialIDFiltersOverride("limelight", new int[] { 4, 3, 7, 8 });
-
     SmartDashboard.putNumber("underhand", Constants.Arm.Positions.UNDERHAND);
+
+    System.out.println("skibidi yeah!");
   }
 
   @Override
@@ -64,8 +64,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-    if (DriverStation.isFMSAttached()) {
-      m_robotContainer.setStartingPose(startSpot.getSelected());
+    if (DriverStation.isDSAttached()) {
+      SmartDashboard.putNumber("got a ds trash number", Timer.getFPGATimestamp());
     }
   }
 
@@ -99,13 +99,13 @@ public class Robot extends TimedRobot {
     SignalLogger.start();
 
     // default to Blue Alliance
-    Alliance ally = DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue);
+    Alliance ally = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
     m_robotContainer.drivetrain.setAlliance(ally);
 
     if (ally.equals(DriverStation.Alliance.Blue)) {
       LimeLight.front.setPriorityTag(7);
     } else {
-      LimeLight.front.setPriorityTag(3);
+      LimeLight.front.setPriorityTag(4);
     }
   }
 

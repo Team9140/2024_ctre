@@ -15,11 +15,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.FollowPath;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.CameraVision;
@@ -68,14 +70,15 @@ public class RobotContainer {
 
     this.joystick.a().onTrue(
         this.drivetrain.setDriveMode(DriveMode.UNDERHAND_SPEAKER_DRIVE)
-        .alongWith(this.thrower.prepareSpeaker())
-        .alongWith(this.intake.off())
-        .alongWith(this.arm.trackAngle(CameraVision::getUnderhandAngle)));
+            .alongWith(this.thrower.prepareSpeaker())
+            .alongWith(this.intake.off())
+            .alongWith(this.arm.trackAngle(CameraVision::getUnderhandAngle)));
 
     this.joystick.y().onTrue(
         this.arm.setOverhand()
             .alongWith(this.thrower.prepareSpeaker())
-            .alongWith(this.intake.off()));
+            .alongWith(this.intake.off())
+            .alongWith(this.drivetrain.setDriveMode(DriveMode.FIELD_CENTRIC_DRIVE)));
 
     this.joystick.b().onTrue(
         this.drivetrain.setDriveMode(DriveMode.AMP_DRIVE)
@@ -86,7 +89,8 @@ public class RobotContainer {
     this.joystick.x().onTrue(
         this.arm.setStow()
             .alongWith(this.intake.off())
-            .alongWith(this.thrower.off()));
+            .alongWith(this.thrower.off())
+            .alongWith(this.drivetrain.setDriveMode(DriveMode.FIELD_CENTRIC_DRIVE)));
 
     // Intake Note
     this.joystick.rightBumper()
@@ -98,7 +102,11 @@ public class RobotContainer {
         .onFalse(this.intake.off().alongWith(this.arm.setStow()).alongWith(this.thrower.hold()));
 
     // Eject stuck Note
-    this.joystick.leftBumper().onTrue(this.thrower.eject()).onFalse(this.thrower.off());
+    this.joystick.leftBumper()
+        .onTrue(this.thrower.eject()
+            .alongWith(this.intake.reverseIntake())
+            .alongWith(this.drivetrain.setDriveMode(DriveMode.FIELD_CENTRIC_DRIVE)))
+        .onFalse(this.thrower.off());
 
     // Throw note
     this.joystick.rightTrigger()
@@ -136,14 +144,95 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
+    FollowPath hmm = new FollowPath("cheese", this.drivetrain, true);
     return new SequentialCommandGroup(
-        this.arm.setOverhand()
-            .alongWith(this.thrower.prepareSpeaker())
-            .alongWith(this.intake.off()),
-        new WaitCommand(1.0),
+        this.intake.off().alongWith(this.thrower.prepareSpeaker())
+            .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND)),
+        new WaitCommand(0.5),
         this.thrower.launch(),
-        new WaitCommand(1.0),
-        this.arm.setIntake().alongWith(this.thrower.off()));
+        new WaitCommand(0.25),
+        this.arm.setStow().alongWith(this.intake.off()),
+        new WaitCommand(0.25),
+        new ParallelCommandGroup(
+            hmm,
+            new SequentialCommandGroup(
+                this.intake.intakeNote().alongWith(this.thrower.setIntake()),
+                new WaitCommand(2.2),
+                this.intake.off().alongWith(this.thrower.prepareSpeaker())
+                    .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND + 0.125)),
+                new WaitCommand(0.85),
+                this.thrower.launch(), // throw 1
+                new WaitCommand(0.1),
+                this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()),
+                new WaitCommand(1.45),
+                this.intake.off().alongWith(this.thrower.prepareSpeaker())
+                    .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND + 0.125)),
+                new WaitCommand(0.7),
+                this.thrower.launch(), // throw 2
+                new WaitCommand(0.2),
+                this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()),
+                new WaitCommand(1.7),
+                this.intake.off().alongWith(this.thrower.prepareSpeaker())
+                    .alongWith(this.arm.setAngle(0.25 * Math.PI + 0.1)),
+                new WaitCommand(0.7),
+                this.thrower.launch(), // throw 3
+                new WaitCommand(0.2),
+                this.thrower.off().alongWith(this.arm.setStow()))));
+
+    // return this.intake.off().alongWith(this.thrower.prepareSpeaker())
+    // .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND))
+    // .andThen(new WaitCommand(0.5))
+    // .andThen(this.thrower.launch())
+    // .andThen(new WaitCommand(0.25))
+    // .andThen(this.arm.setStow().alongWith(this.intake.off()))
+    // .andThen(new WaitCommand(0.25))
+    // .andThen(new FollowPath("cheese", drivetrain, true)
+
+    // .alongWith(new WaitCommand(0)
+    // .andThen(this.intake.intakeNote().alongWith(this.thrower.setIntake()))).asProxy()
+
+    // .alongWith(new WaitCommand(2.17)
+    // .andThen(this.intake.off().alongWith(this.thrower.prepareSpeaker())
+    // .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND +
+    // 0.125)))).asProxy()
+
+    // // throw number 2
+    // .alongWith(new WaitCommand(2.9)
+    // .andThen(this.thrower.launch())).asProxy()
+
+    // .alongWith(new WaitCommand(3.4)
+    // .andThen(this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()))).asProxy()
+
+    // .alongWith(new WaitCommand(4.3)
+    // .andThen(this.intake.off().alongWith(this.thrower.prepareSpeaker())
+    // .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND +
+    // 0.125)))).asProxy()
+
+    // // throw number 3
+    // .alongWith(new WaitCommand(4.7)
+    // .andThen(this.thrower.launch())).asProxy()
+
+    // .alongWith(new WaitCommand(5.4)
+    // .andThen(this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()))).asProxy()
+
+    // .alongWith(new WaitCommand(6.5)
+    // .andThen(this.intake.off().alongWith(this.thrower.prepareSpeaker())
+    // .alongWith(this.arm.setAngle(0.25 * Math.PI + 0.1)))).asProxy()
+
+    // // throw number 4
+    // .alongWith(new WaitCommand(7.3)
+    // .andThen(this.thrower.launch())).asProxy()
+
+    // .alongWith(new WaitCommand(8.0)
+    // .andThen(this.thrower.off().alongWith(this.arm.setStow()))).asProxy());
+    // return new SequentialCommandGroup(
+    // this.arm.setOverhand()
+    // .alongWith(this.thrower.prepareSpeaker())
+    // .alongWith(this.intake.off()),
+    // new WaitCommand(1.0),
+    // this.thrower.launch(),
+    // new WaitCommand(1.0),
+    // this.arm.setIntake().alongWith(this.thrower.off()));
   }
 
   public void periodic() {
@@ -151,25 +240,27 @@ public class RobotContainer {
     SmartDashboard.putNumber("angle target", this.drivetrain.targetHeading().getDegrees());
 
     LimeLight.front.setRobotOrientation(this.drivetrain.getState().Pose.getRotation());
+    LimeLight.back.setRobotOrientation(this.drivetrain.getState().Pose.getRotation());
 
-    try {
-      boolean reject = false;
-      LimelightHelpers.PoseEstimate llPose = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-front");
+    // try {
+    // boolean reject = false;
+    // LimelightHelpers.PoseEstimate llPose =
+    // LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-front");
 
-      if (llPose != null) {
-        reject |= (Math.abs(this.drivetrain.getPigeon2().getRate()) >= 480.0);
-        reject |= llPose.avgTagArea <= 0.2;
-        // reject |= llPose.avgTagDist >= 4.0;
+    // if (llPose != null) {
+    // reject |= (Math.abs(this.drivetrain.getPigeon2().getRate()) >= 360.0);
+    // reject |= llPose.avgTagArea <= 0.2;
+    // // reject |= llPose.avgTagDist >= 4.0;
 
-        if (!reject) {
-          this.drivetrain.addVisionMeasurement(llPose.pose, llPose.timestampSeconds,
-              VecBuilder.fill(5.0, 5.0, 20.0));
-        }
-      }
+    // if (!reject) {
+    // this.drivetrain.addVisionMeasurement(llPose.pose, llPose.timestampSeconds,
+    // VecBuilder.fill(5.0, 5.0, 999.0));
+    // }
+    // }
 
-    } catch (Exception e) {
-      // oops???
-    }
+    // } catch (Exception e) {
+    // // oops???
+    // }
 
     f.setRobotPose(drivetrain.getState().Pose);
   }

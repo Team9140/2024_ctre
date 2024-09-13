@@ -2,10 +2,12 @@ package frc.robot.subsystems;
 
 import java.util.EnumSet;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTable.TableEventListener;
 import edu.wpi.first.networktables.NetworkTableEvent.Kind;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -13,10 +15,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.LimelightResults;
 import frc.robot.LimelightHelpers.LimelightTarget_Fiducial;
+import frc.robot.generated.TunerConstants;
 
 public class LimeLight extends SubsystemBase {
 
     public static final LimeLight front = new LimeLight("limelight-front");
+    public static final LimeLight back = new LimeLight("limelight-back");
 
     private String name;
     private int priorityID;
@@ -66,6 +70,22 @@ public class LimeLight extends SubsystemBase {
                 }
 
                 latestResult = vr;
+
+                LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(LimeLight.this.name);
+
+                if (mt1 != null) {
+                    boolean reject = false;
+
+                    reject |= (Math.abs(TunerConstants.DriveTrain.getPigeon2().getRate()) >= 360.0);
+                    reject |= mt1.avgTagArea <= 0.1;
+                    reject |= mt1.avgTagDist >= 4.0;
+
+                    if (!reject) {
+                        double thetaStdDev = DriverStation.isEnabled() ? 999.9 : 20.0;
+                        TunerConstants.DriveTrain.addVisionMeasurement(mt1.pose, mt1.timestampSeconds,
+                                VecBuilder.fill(5.0, 5.0, thetaStdDev));
+                    }
+                }
             }
         }
     }
