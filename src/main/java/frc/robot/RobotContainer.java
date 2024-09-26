@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.FollowPath;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Arm;
@@ -31,6 +32,7 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.LimeLight;
 import frc.robot.subsystems.Yeeter;
 import frc.robot.subsystems.CommandSwerveDrivetrain.DriveMode;
+import frc.robot.sysid.SysIdRoutines;
 
 public class RobotContainer {
 
@@ -139,6 +141,12 @@ public class RobotContainer {
     // this.joystick.b().whileTrue(thrower.YeeterRoutine.dynamic(Direction.kReverse));
     // this.joystick.x().whileTrue(thrower.YeeterRoutine.quasistatic(Direction.kForward));
     // this.joystick.y().whileTrue(thrower.YeeterRoutine.quasistatic(Direction.kReverse));
+
+    // this.joystick.a().whileTrue(SysIdRoutines.armTorqueCurrentRoutine.dynamic(Direction.kForward));
+    // this.joystick.b().whileTrue(SysIdRoutines.armTorqueCurrentRoutine.dynamic(Direction.kReverse));
+    // this.joystick.x().whileTrue(SysIdRoutines.armTorqueCurrentRoutine.quasistatic(Direction.kForward));
+    // this.joystick.y().whileTrue(SysIdRoutines.armTorqueCurrentRoutine.quasistatic(Direction.kReverse));
+    
 
     drivetrain.registerTelemetry(logger::telemeterize);
   }

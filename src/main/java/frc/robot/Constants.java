@@ -208,24 +208,22 @@ public final class Constants {
     public static final double S = 0.14178;
     public static final double V = 0.94316;
     public static final double A = 0.07;
-    public static final double MAX_CURRENT = 48.0; // Amps
-    public static final double SENSOR_TO_MECHANISM_RATIO = 80.0 / 9.0 * 58.0 / 11.0 / (2 * Math.PI); // Radian rotations
-                                                                                                     // of arm
+    public static final double MAX_CURRENT = 40.0; // Amps
+    public static final double SENSOR_TO_MECHANISM_RATIO = 80.0 / 9.0 * 58.0 / 11.0; // rotations of arm
 
     // Motion Magic Specific Limits
-    public static final double CRUISE_VELOCITY = 24.0; // Radians per second
-    public static final double ACCELERATION = 36.0; // Radians per second per secon
-    public static final double FEED_FORWARD = 0.0; // FIXME: for later
+    public static final double CRUISE_VELOCITY = 1.9; // rotations per second
+    public static final double ACCELERATION = 4.0; // rotations per second per secon
     public static final double INITIAL_VARIANCE = Units.degreesToRadians(5); // Radians
     public static final double AIM_ERROR = Math.toRadians(1.0);
 
-    // Positions in radians
+    // Positions in rotations
     public static class Positions {
-      public static final double INTAKE = -1.7;
-      public static final double AMP = 2.0;
+      public static final double INTAKE = -0.26;
+      public static final double AMP = 0.38;
 
-      public static final double UNDERHAND = -Math.PI / 3.25;
-      public static final double OVERHAND = 0.25 * Math.PI;
+      public static final double UNDERHAND = -Math.PI / 3.25 / (Math.PI * 2.0);
+      public static final double OVERHAND = 0.18;
     }
   }
 

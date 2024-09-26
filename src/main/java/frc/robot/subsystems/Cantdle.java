@@ -36,12 +36,21 @@ public class Cantdle extends SubsystemBase {
                 () -> DriverStation.getAlliance().isPresent()
                         && Alliance.Red.equals(DriverStation.getAlliance().get()));
     }
-
+ 
     public Command setColor(Color8Bit c) {
         return this.runOnce(() -> this.candle.setLEDs(c.red, c.green, c.blue));
     }
 
+    public Command off() {
+        return this.setColor(new Color8Bit(0, 0, 0));
+    }
+
     public Command flashColor(Color8Bit c, double seconds) {
         return this.setColor(c).andThen(Commands.waitSeconds(seconds)).andThen(this.solidAllianceColor());
+    }
+
+    public Command blinkColor(Color8Bit c, double seconds) {
+        return this.setColor(c).andThen(Commands.waitSeconds(0.1)).andThen(this.off())
+                .andThen(Commands.waitSeconds(0.1)).repeatedly().withTimeout(seconds);
     }
 }

@@ -52,10 +52,10 @@ public class SysIdRoutines {
         // pretend to output with volts even though is amps
         public static final SysIdRoutine armTorqueCurrentRoutine = new SysIdRoutine(
                         new SysIdRoutine.Config(
-                                        Units.Volts.of(0.1).per(Units.Seconds.of(1)),
-                                        Units.Volts.of(2.0),
+                                        Units.Volts.of(3.0).per(Units.Seconds.of(1)),
+                                        Units.Volts.of(8.0),
                                         null,
-                                        (state) -> SignalLogger.writeString("state", state.toString())),
+                                        (state) -> SignalLogger.writeString("arm-tc-state", state.toString())),
                         new SysIdRoutine.Mechanism(
                                         (amps) -> Arm.getInstance().setAmpsSysID(amps.magnitude()),
                                         null,

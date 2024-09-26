@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
 import frc.robot.Util;
 import frc.robot.subsystems.LimeLight.VisionResult;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
 
@@ -62,6 +63,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
+        // super(driveTrainConstants, 250.0, VecBuilder.fill(0, 0, 0), VecBuilder.fill(0, 0, 0), modules);
 
         if (Utils.isSimulation()) {
             startSimThread();

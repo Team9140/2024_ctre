@@ -3,17 +3,17 @@ package frc.robot.subsystems;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.configs.*;
+import com.ctre.phoenix6.controls.EmptyControl;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
@@ -36,7 +36,9 @@ public class Arm extends SubsystemBase {
    * A MagicMotion instance that outputs with a voltage. This is used to simplify
    * PID control
    **/
-  private final MotionMagicVoltage motionMagic;
+  // private final MotionMagicVoltage motionMagic;
+
+  private final MotionMagicTorqueCurrentFOC motionMagic;
 
   // Set PID and SVA values
   Slot0Configs launcherGains = new Slot0Configs()
@@ -46,6 +48,15 @@ public class Arm extends SubsystemBase {
       .withKS(Constants.Arm.S)
       .withKV(Constants.Arm.V)
       .withKA(Constants.Arm.A);
+
+  Slot0Configs tcGains = new Slot0Configs()
+      .withKP(2600)
+      .withKD(384)
+      .withKA(8.0)
+      .withKV(0.03)
+      .withKS(3.95)
+      .withKG(28.0)
+      .withGravityType(GravityTypeValue.Arm_Cosine);
 
   // Ensure that the motor doesn't die with current limits
   CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs()
@@ -76,7 +87,7 @@ public class Arm extends SubsystemBase {
 
   // Apply other configs
   TalonFXConfiguration motorConfig = new TalonFXConfiguration()
-      .withSlot0(launcherGains)
+      .withSlot0(tcGains)
       .withCurrentLimits(currentLimitsConfigs)
       .withFeedback(feedbackConfigs)
       .withMotionMagic(motionMagicConfigs)
@@ -89,15 +100,24 @@ public class Arm extends SubsystemBase {
     this.motor.setNeutralMode(NeutralModeValue.Brake);
 
     // Initialize Motion Magic
-    this.motionMagic = new MotionMagicVoltage(Constants.Arm.Positions.INTAKE)
-        .withEnableFOC(true)
-        .withSlot(0)
-        .withFeedForward(Constants.Arm.FEED_FORWARD);
+    // this.motionMagic = new MotionMagicVoltage(Constants.Arm.Positions.INTAKE)
+    // .withEnableFOC(true)
+    // .withSlot(0)
+    // .withFeedForward(Constants.Arm.FEED_FORWARD);
+
+    this.motor.getConfigurator()
+        .apply(new TorqueCurrentConfigs()
+            .withPeakForwardTorqueCurrent(Constants.Arm.MAX_CURRENT)
+            .withPeakReverseTorqueCurrent(-Constants.Arm.MAX_CURRENT));
+
+    this.motionMagic = new MotionMagicTorqueCurrentFOC(Constants.Arm.Positions.INTAKE)
+        .withSlot(0);
+
 
     // Set arm encoder position as starting if it is the first time booting the
     // kraken
     if (Math.abs(this.getAngle()) < Constants.Arm.INITIAL_VARIANCE)
-      this.motor.setPosition(-Math.PI / 2.0);
+      this.motor.setPosition(-0.25);
   }
 
   /**
@@ -116,10 +136,15 @@ public class Arm extends SubsystemBase {
    **/
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Arm Position", this.getAngle());
-    SmartDashboard.putNumber("Arm Current", this.motor.getStatorCurrent().getValueAsDouble());
+    SmartDashboard.putNumber("Arm Position (rotations)", this.getAngle());
+    SmartDashboard.putNumber("Arm Position (rads)", this.getAngle() * Math.PI * 2.0);
+    SmartDashboard.putNumber("Arm Current", this.motor.getTorqueCurrent().getValueAsDouble());
+    if (this.motor.getAppliedControl() instanceof MotionMagicTorqueCurrentFOC) {
+      SmartDashboard.putNumber("arm motion profile thingy", ((MotionMagicTorqueCurrentFOC) this.motor.getAppliedControl()).Position);
+    }
+    
   }
-
+;;;;;;;;
   public boolean atPosition() {
     return Math.abs(this.getAngle() - this.motionMagic.Position) <= Math.toRadians(2.0);
   }
@@ -209,7 +234,7 @@ public class Arm extends SubsystemBase {
       // (Math.toDegrees(angleSupplier.getAsDouble()) * 10.0)) / 10.0);
       // this.motor.setControl(this.motionMagic.withPosition(roundedAngle));
       if (Math.abs(angleSupplier.getAsDouble() - this.motionMagic.Position) >= Math.toRadians(0.5)) {
-        this.motor.setControl(this.motionMagic.withPosition(angleSupplier.getAsDouble()));
+        // this.motor.setControl(this.motionMagic.withPosition(angleSupplier.getAsDouble()));
       }
     });
   }
