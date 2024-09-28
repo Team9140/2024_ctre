@@ -14,6 +14,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -46,7 +47,7 @@ public class Yeeter extends SubsystemBase {
     private final VoltageOut SysIDController = new VoltageOut(0.0).withEnableFOC(true);
 
     public SysIdRoutine YeeterRoutine = new SysIdRoutine(new SysIdRoutine.Config(
-            null, Units.Volts.of(4.0), null, (state) -> SignalLogger.writeString("state", state.toString())),
+            null, Units.Volts.of(4.0), null, (state) -> SignalLogger.writeString("yeeter-state", state.toString())),
             new SysIdRoutine.Mechanism((volts) -> this.SysIDController.withOutput(volts.magnitude()), null, this));
 
     private Yeeter() {
@@ -59,9 +60,10 @@ public class Yeeter extends SubsystemBase {
                 .withSupplyCurrentLimitEnable(true);
 
         Slot0Configs configs = new Slot0Configs()
-                .withKP(0.26)
-                .withKV(0.15)
-                .withKS(0.36806);
+                .withKP(0.2)
+                .withKV(0.13)
+                .withKS(0.2)
+                .withKA(0.00636);
 
         TalonFXConfiguration launcherConfiguration = new TalonFXConfiguration()
                 .withCurrentLimits(launcherCurrentLimits)
@@ -90,9 +92,27 @@ public class Yeeter extends SubsystemBase {
     public void periodic() {
         // this.leftRollers.setControl(SysIDController);
         // this.rightRollers.setControl(SysIDController);
-        this.leftRollers.setControl(this.leftSpeed.withVelocity(this.leftSlew.calculate(this.leftSpeedTarget)));
-        this.rightRollers.setControl(this.rightSpeed.withVelocity(this.rightSlew.calculate(this.rightSpeedTarget)));
+        if (this.leftSpeedTarget != 0.0) {
+            this.leftRollers.setControl(this.leftSpeed.withVelocity(this.leftSlew.calculate(this.leftSpeedTarget)));
+        } else {
+            this.leftRollers.setControl(new VoltageOut(0.0));
+        }
+
+        if (this.rightSpeedTarget != 0.0) {
+            this.rightRollers.setControl(this.rightSpeed.withVelocity(this.rightSlew.calculate(this.rightSpeedTarget)));
+        } else {
+            this.rightRollers.setControl(new VoltageOut(0.0));
+        }
+        
+        
         this.feeder.setVoltage(this.feederVolts);
+
+        SmartDashboard.putNumber("left roller RPS", this.leftRollers.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("right roller RPS", this.rightRollers.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("left roller RPS target", this.leftSpeedTarget);
+        SmartDashboard.putNumber("right roller RPS target", this.rightSpeedTarget);
+        SmartDashboard.putNumber("left roller amps", this.leftRollers.getTorqueCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("right roller amps", this.rightRollers.getTorqueCurrent().getValueAsDouble());
     }
 
     public double getFeederCurrent() {

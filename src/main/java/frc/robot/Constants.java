@@ -219,7 +219,7 @@ public final class Constants {
 
     // Positions in rotations
     public static class Positions {
-      public static final double INTAKE = -0.26;
+      public static final double INTAKE = -0.27;
       public static final double AMP = 0.38;
 
       public static final double UNDERHAND = -Math.PI / 3.25 / (Math.PI * 2.0);
@@ -262,10 +262,10 @@ public final class Constants {
 
   public static final class Yeeter {
     public static final double MOTOR_ROLLER_RATIO = 32.0 / 21.0;
-    public static final double INTAKE_RPS = -2000.0 / 60.0 / MOTOR_ROLLER_RATIO; // divide by 60 for RPM
+    public static final double INTAKE_RPS = -2500.0 / 60.0 / MOTOR_ROLLER_RATIO; // divide by 60 for RPM
     public static final double AMP_RPS = 800.0 / 60.0 / MOTOR_ROLLER_RATIO;
-    public static final double LEFT_SPEAKER_RPS = 8500.0 / 60.0 / MOTOR_ROLLER_RATIO;
-    public static final double RIGHT_SPEAKER_RPS = 5500.0 / 60.0 / MOTOR_ROLLER_RATIO;
+    public static final double LEFT_SPEAKER_RPS = 7000.0 / 60.0 / MOTOR_ROLLER_RATIO;
+    public static final double RIGHT_SPEAKER_RPS = 5300.0 / 60.0 / MOTOR_ROLLER_RATIO;
   }
 
   // public static class Auto {
