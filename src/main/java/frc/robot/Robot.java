@@ -14,7 +14,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.LimeLight;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -48,6 +52,23 @@ public class Robot extends TimedRobot {
 
     SmartDashboard.putNumber("underhand", Constants.Arm.Positions.UNDERHAND);
 
+    AtomicReference<String> autoName = new AtomicReference<>();
+
+    new Trigger(() -> DriverStation.getAlliance().orElse(Alliance.Blue).equals(Alliance.Blue))
+            .onTrue(Commands.runOnce(() -> this.m_autonomousCommand = this.m_robotContainer.getAutonomousCommand(autoName.get())).ignoringDisable(true))
+            .onFalse(Commands.runOnce(() -> this.m_autonomousCommand = this.m_robotContainer.getAutonomousCommand(autoName.get())).ignoringDisable(true));
+
+    SendableChooser<String> autoChooser = new SendableChooser<>();
+    autoChooser.addOption("Skibidi Rizz", "TestPath");
+    autoChooser.addOption("Source side", "SourceSide");
+    autoChooser.addOption("Amp side", "AmpSide");
+    autoChooser.setDefaultOption("None", null);
+    autoChooser.onChange((name) -> {
+      autoName.set(name);
+      this.m_autonomousCommand = this.m_robotContainer.getAutonomousCommand(autoName.get());
+    });
+    SmartDashboard.putData(autoChooser);
+
     System.out.println("skibidi yeah!");
   }
 
@@ -75,8 +96,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
@@ -99,10 +118,10 @@ public class Robot extends TimedRobot {
     SignalLogger.start();
 
     // default to Blue Alliance
-    Alliance ally = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue);
+    Alliance ally = DriverStation.getAlliance().orElse(Alliance.Blue);
     m_robotContainer.drivetrain.setAlliance(ally);
 
-    if (ally.equals(DriverStation.Alliance.Blue)) {
+    if (ally.equals(Alliance.Blue)) {
       LimeLight.front.setPriorityTag(7);
     } else {
       LimeLight.front.setPriorityTag(4);

@@ -1,8 +1,6 @@
 package frc.robot.commands;
 
-import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoControlFunction;
-import com.choreo.lib.ChoreoTrajectory;
 import com.choreo.lib.ChoreoTrajectoryState;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import edu.wpi.first.math.controller.PIDController;
@@ -13,6 +11,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.lib.Choreo;
+import frc.robot.lib.ChoreoTrajectory;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class FollowPath extends Command {
         );
         this.m_timer = new Timer();
 
-        if (mirror && DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red)) {
+        if (mirror && DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red)) {
             this.trajectory = this.trajectory.flipped();
         }
     }
@@ -47,7 +47,6 @@ public class FollowPath extends Command {
     @Override
     public void initialize() {
         this.m_timer.restart();
-        // this.m_drive.seedFieldRelative(this.trajectory.getInitialPose());
     }
 
     @Override
@@ -63,6 +62,10 @@ public class FollowPath extends Command {
         } else {
             this.m_drive.setControl(m_request.withSpeeds(trajectory.getFinalState().getChassisSpeeds()));
         }
+    }
+
+    public ChoreoTrajectory getTrajectory() {
+        return this.trajectory;
     }
 
     @Override
