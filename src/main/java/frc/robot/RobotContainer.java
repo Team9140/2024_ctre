@@ -168,21 +168,21 @@ public class RobotContainer {
                 this.intake.intakeNote().alongWith(this.thrower.setIntake()),
                 new WaitCommand(2.2),
                 this.intake.off().alongWith(this.thrower.prepareSpeaker())
-                    .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND + 0.125)),
+                    .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND + 0.02)),
                 new WaitCommand(0.85),
                 this.thrower.launch(), // throw 1
                 new WaitCommand(0.1),
                 this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()),
                 new WaitCommand(1.45),
                 this.intake.off().alongWith(this.thrower.prepareSpeaker())
-                    .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND + 0.125)),
+                    .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND + 0.02)),
                 new WaitCommand(0.7),
                 this.thrower.launch(), // throw 2
                 new WaitCommand(0.2),
                 this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()),
                 new WaitCommand(1.7),
                 this.intake.off().alongWith(this.thrower.prepareSpeaker())
-                    .alongWith(this.arm.setAngle(0.25 * Math.PI + 0.1)),
+                    .alongWith(this.arm.setAngle(0.14)),
                 new WaitCommand(0.7),
                 this.thrower.launch(), // throw 3
                 new WaitCommand(0.2),

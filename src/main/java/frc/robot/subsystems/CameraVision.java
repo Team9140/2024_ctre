@@ -18,7 +18,7 @@ public class CameraVision extends SubsystemBase {
         mapping.put(Double.valueOf(6.31), Double.valueOf(-0.127));
         mapping.put(Double.valueOf(3.25), Double.valueOf(-0.137));
         mapping.put(Double.valueOf(0.58), Double.valueOf(-0.144));
-        mapping.put(Double.valueOf(-1.66), Double.valueOf(-0.151));
+        mapping.put(Double.valueOf(-1.66), Double.valueOf(-0.151 ));
         mapping.put(Double.valueOf(-3.09), Double.valueOf(-0.154));
         mapping.put(Double.valueOf(-4.56), Double.valueOf(-0.159));
         mapping.put(Double.valueOf(-5.95), Double.valueOf(-0.164));

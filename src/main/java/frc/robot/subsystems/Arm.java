@@ -231,9 +231,9 @@ public class Arm extends SubsystemBase {
   public Command trackAngle(DoubleSupplier angleSupplier) {
     return this.run(() -> {
       // double roundedAngle = Math.toRadians(((int)
-      // (Math.toDegrees(angleSupplier.getAsDouble()) * 10.0)) / 10.0);
+      // (Math.toDegrees(angleSupplier.getAsDouble()) * 10.0)) / 10.0); 
       // this.motor.setControl(this.motionMagic.withPosition(roundedAngle));
-      if (Math.abs(angleSupplier.getAsDouble() - this.motionMagic.Position) >= Math.toRadians(0.5)) {
+      if (Math.abs(angleSupplier.getAsDouble() - this.motionMagic.Position) >= (Math.toRadians(0.5) / 2.0 * Math.PI)) {
         this.motor.setControl(this.motionMagic.withPosition(angleSupplier.getAsDouble()));
       }
     });

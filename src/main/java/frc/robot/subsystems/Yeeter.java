@@ -107,12 +107,12 @@ public class Yeeter extends SubsystemBase {
         
         this.feeder.setVoltage(this.feederVolts);
 
-        SmartDashboard.putNumber("left roller RPS", this.leftRollers.getVelocity().getValueAsDouble());
-        SmartDashboard.putNumber("right roller RPS", this.rightRollers.getVelocity().getValueAsDouble());
-        SmartDashboard.putNumber("left roller RPS target", this.leftSpeedTarget);
-        SmartDashboard.putNumber("right roller RPS target", this.rightSpeedTarget);
-        SmartDashboard.putNumber("left roller amps", this.leftRollers.getTorqueCurrent().getValueAsDouble());
-        SmartDashboard.putNumber("right roller amps", this.rightRollers.getTorqueCurrent().getValueAsDouble());
+        // SmartDashboard.putNumber("left roller RPS", this.leftRollers.getVelocity().getValueAsDouble());
+        // SmartDashboard.putNumber("right roller RPS", this.rightRollers.getVelocity().getValueAsDouble());
+        // SmartDashboard.putNumber("left roller RPS target", this.leftSpeedTarget);
+        // SmartDashboard.putNumber("right roller RPS target", this.rightSpeedTarget);
+        // SmartDashboard.putNumber("left roller amps", this.leftRollers.getTorqueCurrent().getValueAsDouble());
+        // SmartDashboard.putNumber("right roller amps", this.rightRollers.getTorqueCurrent().getValueAsDouble());
     }
 
     public double getFeederCurrent() {

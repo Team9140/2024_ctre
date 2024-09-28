@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
@@ -63,7 +64,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
-        // super(driveTrainConstants, 250.0, VecBuilder.fill(0, 0, 0), VecBuilder.fill(0, 0, 0), modules);
+        // super(driveTrainConstants, 250.0, VecBuilder.fill(0, 0, 0),
+        // VecBuilder.fill(0, 0, 0), modules);
 
         if (Utils.isSimulation()) {
             startSimThread();
@@ -100,7 +102,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             } else {
                 return Rotation2d.fromDegrees(0.0);
             }
-            
+
         }
         Optional<Rotation2d> oldHeading = sampleHeading(res.timestamp);
 
@@ -152,9 +154,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                     // intentional fall through
                 default:
                     this.setControl(fieldCentricDrive
-                            .withVelocityX(leftY * Constants.Drive.MAX_SPEED_MPS)
-                            .withVelocityY(leftX * Constants.Drive.MAX_SPEED_MPS)
-                            .withRotationalRate(rightX * Constants.Drive.MAX_ROTATION_RATE_RPS));
+                            .withVelocityX(leftY * Constants.Drive.MAX_SPEED_MPS * 0.5)
+                            .withVelocityY(leftX * Constants.Drive.MAX_SPEED_MPS * 0.5)
+                            .withRotationalRate(rightX * Constants.Drive.MAX_ROTATION_RATE_RPS * 0.5));
                     break;
             }
         });
@@ -192,10 +194,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public void periodic() {
 
         // if (DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue)
-        //         .equals(DriverStation.Alliance.Blue)) {
-        //     setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
+        // .equals(DriverStation.Alliance.Blue)) {
+        // setOperatorPerspectiveForward(Rotation2d.fromDegrees(0));
         // } else {
-        //     setOperatorPerspectiveForward(Rotation2d.fromDegrees(180));
+        // setOperatorPerspectiveForward(Rotation2d.fromDegrees(180));
         // }
         SmartDashboard.putNumber("pigeon yaw", this.m_pigeon2.getYaw().getValueAsDouble());
         SmartDashboard.putNumber("green yaw", this.green_gyro.getAngle());
@@ -221,6 +223,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         SmartDashboard.putNumber("drive angle 2", Math.toDegrees(this.ampDrive.HeadingController.getSetpoint()));
 
         m_HeadingBuffer.addSample(Timer.getFPGATimestamp(), this.getState().Pose.getRotation());
+
+        SignalLogger.writeDoubleArray("odometry",
+                new double[] { this.getState().Pose.getX(), this.getState().Pose.getY(),
+                        this.getState().Pose.getRotation().getDegrees() });
     }
 
     /**

@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import java.util.EnumSet;
 
+import com.ctre.phoenix6.SignalLogger;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
@@ -81,9 +83,12 @@ public class LimeLight extends SubsystemBase {
                     reject |= mt1.avgTagDist >= 4.0;
 
                     if (!reject) {
-                        double thetaStdDev = DriverStation.isEnabled() ? 999.9 : 20.0;
+                        double thetaStdDev = DriverStation.isEnabled() ? 999.9 : 5.0;
                         TunerConstants.DriveTrain.addVisionMeasurement(mt1.pose, mt1.timestampSeconds,
                                 VecBuilder.fill(5.0, 5.0, thetaStdDev));
+
+                        SignalLogger.writeDoubleArray(LimeLight.this.name + " pose",
+                                new double[] { mt1.pose.getX(), mt1.pose.getY(), mt1.pose.getRotation().getDegrees() });
                     }
                 }
             }

@@ -220,10 +220,10 @@ public final class Constants {
     // Positions in rotations
     public static class Positions {
       public static final double INTAKE = -0.27;
-      public static final double AMP = 0.38;
+      public static final double AMP = 0.31;
 
       public static final double UNDERHAND = -Math.PI / 3.25 / (Math.PI * 2.0);
-      public static final double OVERHAND = 0.18;
+      public static final double OVERHAND = 0.125;
     }
   }
 
