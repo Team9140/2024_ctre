@@ -32,8 +32,8 @@ public class Yeeter extends SubsystemBase {
 
     private double feederVolts;
 
-    private final TalonFX leftRollers = new TalonFX(6, "jama");
-    private final TalonFX rightRollers = new TalonFX(5, "jama");
+    private final TalonFX leftRollers = new TalonFX(6, Constants.Ports.CTRE_CANBUS);
+    private final TalonFX rightRollers = new TalonFX(5, Constants.Ports.CTRE_CANBUS);
 
     private final VelocityVoltage leftSpeed;
     private final VelocityVoltage rightSpeed;

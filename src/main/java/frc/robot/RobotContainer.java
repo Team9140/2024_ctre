@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -41,6 +43,7 @@ public class RobotContainer {
   public final Intake intake = Intake.getInstance();
   public final Arm arm = Arm.getInstance();
   public final Cantdle lamp = Cantdle.getInstance();
+  private final TalonFX climber = new TalonFX(Constants.Ports.CLIMBER, Constants.Ports.CTRE_CANBUS);
 
   // configure yeet mode by commenting one or the other
 
@@ -53,6 +56,16 @@ public class RobotContainer {
   private final CommandXboxController joystick = new CommandXboxController(0);
   private final Telemetry logger = new Telemetry(TunerConstants.kSpeedAt12VoltsMps);
   private final Trigger FMSconnect = new Trigger(DriverStation::isEnabled);
+
+  private enum ClimberPosition {
+    Start,
+    MovingUp,
+    Up,
+    MovingDown,
+    Down
+  }
+
+  private ClimberPosition climberPosition = ClimberPosition.Start;
 
   public RobotContainer() {
     configureBindings();
@@ -148,7 +161,10 @@ public class RobotContainer {
     // this.joystick.b().whileTrue(SysIdRoutines.armTorqueCurrentRoutine.dynamic(Direction.kReverse));
     // this.joystick.x().whileTrue(SysIdRoutines.armTorqueCurrentRoutine.quasistatic(Direction.kForward));
     // this.joystick.y().whileTrue(SysIdRoutines.armTorqueCurrentRoutine.quasistatic(Direction.kReverse));
-    
+
+
+    this.climber.setInverted(true);
+    this.climber.setNeutralMode(NeutralModeValue.Brake);
 
     drivetrain.registerTelemetry(logger::telemeterize);
   }
@@ -293,6 +309,37 @@ public class RobotContainer {
     // } catch (Exception e) {
     // // oops???
     // }
+
+    switch (this.climberPosition) {
+      case MovingUp:
+        this.climber.set(Constants.Climber.UP_VELOCITY);
+        if (this.climber.getPosition().getValueAsDouble() >= Constants.Climber.UP_POSITION) {
+          this.climberPosition = ClimberPosition.Up;
+        }
+        break;
+      case MovingDown:
+        this.climber.set(this.joystick.getLeftTriggerAxis());
+        if (this.climber.getPosition().getValueAsDouble() >= Constants.Climber.DOWN_POSITION) {
+          this.climberPosition = ClimberPosition.Down;
+        }
+        break;
+      case Start:
+        this.climber.set(0.0);
+        if (this.joystick.getHID().getXButton() && this.joystick.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
+          this.climberPosition = ClimberPosition.MovingUp;
+        }
+        break;
+      case Up:
+        this.climber.set(0.0);
+        if (this.joystick.getHID().getXButton() && this.joystick.getHID().getLeftTriggerAxis() >= Constants.Climber.ERROR) {
+          this.climberPosition = ClimberPosition.MovingDown;
+        }
+        break;
+      case Down:
+        this.climber.set(0.0);
+        break;
+    }
+    SmartDashboard.putString("Climber Target", this.climberPosition.toString());
 
     f.setRobotPose(drivetrain.getState().Pose);
   }
