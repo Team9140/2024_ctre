@@ -191,97 +191,97 @@ public class RobotContainer {
     return auto;
   }
 
-//  public Command getAutonomousCommand() {
-//    FollowPath hmm = new FollowPath("cheese", this.drivetrain, true);
-//    return new SequentialCommandGroup(
-//        this.intake.off().alongWith(this.thrower.prepareSpeaker())
-//            .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND)),
-//        new WaitCommand(0.5),
-//        this.thrower.launch(),
-//        new WaitCommand(0.25),
-//        this.arm.setStow().alongWith(this.intake.off()),
-//        new WaitCommand(0.25),
-//        new ParallelCommandGroup(
-//            hmm,
-//            new SequentialCommandGroup(
-//                this.intake.intakeNote().alongWith(this.thrower.setIntake()),
-//                new WaitCommand(2.2),
-//                this.intake.off().alongWith(this.thrower.prepareSpeaker())
-//                    .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND + 0.02)),
-//                new WaitCommand(0.85),
-//                this.thrower.launch(), // throw 1
-//                new WaitCommand(0.1),
-//                this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()),
-//                new WaitCommand(1.45),
-//                this.intake.off().alongWith(this.thrower.prepareSpeaker())
-//                    .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND + 0.02)),
-//                new WaitCommand(0.7),
-//                this.thrower.launch(), // throw 2
-//                new WaitCommand(0.2),
-//                this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()),
-//                new WaitCommand(1.7),
-//                this.intake.off().alongWith(this.thrower.prepareSpeaker())
-//                    .alongWith(this.arm.setAngle(0.14)),
-//                new WaitCommand(0.7),
-//                this.thrower.launch(), // throw 3
-//                new WaitCommand(0.2),
-//                this.thrower.off().alongWith(this.arm.setStow()))));
-//
-//    // return this.intake.off().alongWith(this.thrower.prepareSpeaker())
-//    // .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND))
-//    // .andThen(new WaitCommand(0.5))
-//    // .andThen(this.thrower.launch())
-//    // .andThen(new WaitCommand(0.25))
-//    // .andThen(this.arm.setStow().alongWith(this.intake.off()))
-//    // .andThen(new WaitCommand(0.25))
-//    // .andThen(new FollowPath("cheese", drivetrain, true)
-//
-//    // .alongWith(new WaitCommand(0)
-//    // .andThen(this.intake.intakeNote().alongWith(this.thrower.setIntake()))).asProxy()
-//
-//    // .alongWith(new WaitCommand(2.17)
-//    // .andThen(this.intake.off().alongWith(this.thrower.prepareSpeaker())
-//    // .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND +
-//    // 0.125)))).asProxy()
-//
-//    // // throw number 2
-//    // .alongWith(new WaitCommand(2.9)
-//    // .andThen(this.thrower.launch())).asProxy()
-//
-//    // .alongWith(new WaitCommand(3.4)
-//    // .andThen(this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()))).asProxy()
-//
-//    // .alongWith(new WaitCommand(4.3)
-//    // .andThen(this.intake.off().alongWith(this.thrower.prepareSpeaker())
-//    // .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND +
-//    // 0.125)))).asProxy()
-//
-//    // // throw number 3
-//    // .alongWith(new WaitCommand(4.7)
-//    // .andThen(this.thrower.launch())).asProxy()
-//
-//    // .alongWith(new WaitCommand(5.4)
-//    // .andThen(this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()))).asProxy()
-//
-//    // .alongWith(new WaitCommand(6.5)
-//    // .andThen(this.intake.off().alongWith(this.thrower.prepareSpeaker())
-//    // .alongWith(this.arm.setAngle(0.25 * Math.PI + 0.1)))).asProxy()
-//
-//    // // throw number 4
-//    // .alongWith(new WaitCommand(7.3)
-//    // .andThen(this.thrower.launch())).asProxy()
-//
-//    // .alongWith(new WaitCommand(8.0)
-//    // .andThen(this.thrower.off().alongWith(this.arm.setStow()))).asProxy());
-//    // return new SequentialCommandGroup(
-//    // this.arm.setOverhand()
-//    // .alongWith(this.thrower.prepareSpeaker())
-//    // .alongWith(this.intake.off()),
-//    // new WaitCommand(1.0),
-//    // this.thrower.launch(),
-//    // new WaitCommand(1.0),
-//    // this.arm.setIntake().alongWith(this.thrower.off()));
-//  }
+  public Command getAutonomousCommand() {
+    FollowPath hmm = new FollowPath("cheese", this.drivetrain, true);
+    return new SequentialCommandGroup(
+        this.intake.off().alongWith(this.thrower.prepareSpeaker())
+            .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND)),
+        new WaitCommand(0.5),
+        this.thrower.launch(),
+        new WaitCommand(0.25),
+        this.arm.setStow().alongWith(this.intake.off()),
+        new WaitCommand(0.25),
+        new ParallelCommandGroup(
+            hmm,
+            new SequentialCommandGroup(
+                this.intake.intakeNote().alongWith(this.thrower.setIntake()),
+                new WaitCommand(2.2),
+                this.intake.off().alongWith(this.thrower.prepareSpeaker())
+                    .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND + 0.02)),
+                new WaitCommand(0.85),
+                this.thrower.launch(), // throw 1
+                new WaitCommand(0.1),
+                this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()),
+                new WaitCommand(1.45),
+                this.intake.off().alongWith(this.thrower.prepareSpeaker())
+                    .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND + 0.02)),
+                new WaitCommand(0.7),
+                this.thrower.launch(), // throw 2
+                new WaitCommand(0.2),
+                this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()),
+                new WaitCommand(1.7),
+                this.intake.off().alongWith(this.thrower.prepareSpeaker())
+                    .alongWith(this.arm.setAngle(0.14)),
+                new WaitCommand(0.7),
+                this.thrower.launch(), // throw 3
+                new WaitCommand(0.2),
+                this.thrower.off().alongWith(this.arm.setStow()))));
+
+    // return this.intake.off().alongWith(this.thrower.prepareSpeaker())
+    // .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND))
+    // .andThen(new WaitCommand(0.5))
+    // .andThen(this.thrower.launch())
+    // .andThen(new WaitCommand(0.25))
+    // .andThen(this.arm.setStow().alongWith(this.intake.off()))
+    // .andThen(new WaitCommand(0.25))
+    // .andThen(new FollowPath("cheese", drivetrain, true)
+
+    // .alongWith(new WaitCommand(0)
+    // .andThen(this.intake.intakeNote().alongWith(this.thrower.setIntake()))).asProxy()
+
+    // .alongWith(new WaitCommand(2.17)
+    // .andThen(this.intake.off().alongWith(this.thrower.prepareSpeaker())
+    // .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND +
+    // 0.125)))).asProxy()
+
+    // // throw number 2
+    // .alongWith(new WaitCommand(2.9)
+    // .andThen(this.thrower.launch())).asProxy()
+
+    // .alongWith(new WaitCommand(3.4)
+    // .andThen(this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()))).asProxy()
+
+    // .alongWith(new WaitCommand(4.3)
+    // .andThen(this.intake.off().alongWith(this.thrower.prepareSpeaker())
+    // .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND +
+    // 0.125)))).asProxy()
+
+    // // throw number 3
+    // .alongWith(new WaitCommand(4.7)
+    // .andThen(this.thrower.launch())).asProxy()
+
+    // .alongWith(new WaitCommand(5.4)
+    // .andThen(this.intake.intakeNote().alongWith(this.thrower.setIntake()).alongWith(this.arm.setStow()))).asProxy()
+
+    // .alongWith(new WaitCommand(6.5)
+    // .andThen(this.intake.off().alongWith(this.thrower.prepareSpeaker())
+    // .alongWith(this.arm.setAngle(0.25 * Math.PI + 0.1)))).asProxy()
+
+    // // throw number 4
+    // .alongWith(new WaitCommand(7.3)
+    // .andThen(this.thrower.launch())).asProxy()
+
+    // .alongWith(new WaitCommand(8.0)
+    // .andThen(this.thrower.off().alongWith(this.arm.setStow()))).asProxy());
+    // return new SequentialCommandGroup(
+    // this.arm.setOverhand()
+    // .alongWith(this.thrower.prepareSpeaker())
+    // .alongWith(this.intake.off()),
+    // new WaitCommand(1.0),
+    // this.thrower.launch(),
+    // new WaitCommand(1.0),
+    // this.arm.setIntake().alongWith(this.thrower.off()));
+  }
 
   public void periodic() {
     SmartDashboard.putNumber("front cam angle to goal", LimeLight.front.getLatest().tx);

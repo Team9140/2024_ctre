@@ -3718,46 +3718,85 @@
             "circleObstacles": [],
             "eventMarkers": [
                 {
-                    "name": "prep 2",
-                    "target": 2,
-                    "trajTargetIndex": 2,
-                    "targetTimestamp": 1.8719997399582724,
-                    "offset": 0.5,
-                    "command": {
-                        "type": "named",
-                        "data": {
-                            "name": "prep"
-                        }
-                    }
-                },
-                {
-                    "name": "throw 2",
-                    "target": 3,
-                    "trajTargetIndex": 3,
-                    "targetTimestamp": 3.303472593832522,
+                    "name": "Intake 1",
+                    "target": "first",
+                    "trajTargetIndex": 0,
+                    "targetTimestamp": 0,
                     "offset": 0,
                     "command": {
                         "type": "named",
                         "data": {
-                            "name": "throw"
+                            "name": "intake"
                         }
                     }
                 },
                 {
-                    "name": "prep 3",
-                    "target": 5,
-                    "trajTargetIndex": 5,
-                    "targetTimestamp": 4.407976270505037,
-                    "offset": 0.5,
+                    "name": "Prep 2",
+                    "target": 2,
+                    "trajTargetIndex": 2,
+                    "targetTimestamp": 1.8719997399582724,
+                    "offset": 0.33,
                     "command": {
                         "type": "named",
                         "data": {
-                            "name": "prep"
+                            "name": "prepSpeaker"
                         }
                     }
                 },
                 {
-                    "name": "throw 3",
+                    "name": "Shot 2",
+                    "target": 2,
+                    "trajTargetIndex": 2,
+                    "targetTimestamp": 1.8719997399582724,
+                    "offset": 1.18,
+                    "command": {
+                        "type": "named",
+                        "data": {
+                            "name": "shoot"
+                        }
+                    }
+                },
+                {
+                    "name": "Prep 3",
+                    "target": 5,
+                    "trajTargetIndex": 5,
+                    "targetTimestamp": 4.407976270505037,
+                    "offset": 0.2,
+                    "command": {
+                        "type": "named",
+                        "data": {
+                            "name": "prepSpeaker"
+                        }
+                    }
+                },
+                {
+                    "name": "Shot 3",
+                    "target": 5,
+                    "trajTargetIndex": 5,
+                    "targetTimestamp": 4.407976270505037,
+                    "offset": 0.9,
+                    "command": {
+                        "type": "named",
+                        "data": {
+                            "name": "shoot"
+                        }
+                    }
+                },
+                {
+                    "name": "Intake 2",
+                    "target": 2,
+                    "trajTargetIndex": 2,
+                    "targetTimestamp": 1.8719997399582724,
+                    "offset": 1.28,
+                    "command": {
+                        "type": "named",
+                        "data": {
+                            "name": "intake"
+                        }
+                    }
+                },
+                {
+                    "name": "Intake 3",
                     "target": 6,
                     "trajTargetIndex": 6,
                     "targetTimestamp": 5.516686044561405,
@@ -3765,33 +3804,46 @@
                     "command": {
                         "type": "named",
                         "data": {
-                            "name": "Throw"
+                            "name": "intake"
                         }
                     }
                 },
                 {
-                    "name": "prep 4",
+                    "name": "Prep 4",
                     "target": 8,
                     "trajTargetIndex": 8,
                     "targetTimestamp": 6.836978482539207,
-                    "offset": 0.25,
+                    "offset": 0.34,
                     "command": {
                         "type": "named",
                         "data": {
-                            "name": "prep"
+                            "name": "prepSpeaker"
                         }
                     }
                 },
                 {
-                    "name": "throw 4",
-                    "target": 9,
-                    "trajTargetIndex": 9,
-                    "targetTimestamp": 8.036427534206736,
-                    "offset": 0,
+                    "name": "Shot 4",
+                    "target": 8,
+                    "trajTargetIndex": 8,
+                    "targetTimestamp": 6.836978482539207,
+                    "offset": 1.06,
                     "command": {
                         "type": "named",
                         "data": {
-                            "name": "throw"
+                            "name": "shoot"
+                        }
+                    }
+                },
+                {
+                    "name": "Intake 4",
+                    "target": 9,
+                    "trajTargetIndex": 9,
+                    "targetTimestamp": 8.036427534206736,
+                    "offset": 0.1,
+                    "command": {
+                        "type": "named",
+                        "data": {
+                            "name": "intake"
                         }
                     }
                 }

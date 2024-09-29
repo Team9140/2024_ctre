@@ -3405,29 +3405,56 @@
   ],
   "eventMarkers": [
     {
-      "timestamp": 2.371999739958272,
+      "timestamp": 0,
       "command": {
         "type": "named",
         "data": {
-          "name": "prep"
+          "name": "intake"
         }
       }
     },
     {
-      "timestamp": 3.303472593832522,
+      "timestamp": 2.2019997399582723,
       "command": {
         "type": "named",
         "data": {
-          "name": "throw"
+          "name": "prepSpeaker"
         }
       }
     },
     {
-      "timestamp": 4.907976270505037,
+      "timestamp": 3.0519997399582723,
       "command": {
         "type": "named",
         "data": {
-          "name": "prep"
+          "name": "shoot"
+        }
+      }
+    },
+    {
+      "timestamp": 4.607976270505037,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "prepSpeaker"
+        }
+      }
+    },
+    {
+      "timestamp": 5.307976270505037,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "shoot"
+        }
+      }
+    },
+    {
+      "timestamp": 3.1519997399582724,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "intake"
         }
       }
     },
@@ -3436,25 +3463,34 @@
       "command": {
         "type": "named",
         "data": {
-          "name": "Throw"
+          "name": "intake"
         }
       }
     },
     {
-      "timestamp": 7.086978482539207,
+      "timestamp": 7.176978482539207,
       "command": {
         "type": "named",
         "data": {
-          "name": "prep"
+          "name": "prepSpeaker"
         }
       }
     },
     {
-      "timestamp": 8.036427534206736,
+      "timestamp": 7.8969784825392075,
       "command": {
         "type": "named",
         "data": {
-          "name": "throw"
+          "name": "shoot"
+        }
+      }
+    },
+    {
+      "timestamp": 8.136427534206735,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "intake"
         }
       }
     }
