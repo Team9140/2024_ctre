@@ -3592,5 +3592,60 @@
       "timestamp": 12.348540715149255
     }
   ],
-  "eventMarkers": []
+  "eventMarkers": [
+    {
+      "timestamp": 0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "intake"
+        }
+      }
+    },
+    {
+      "timestamp": 5.096597882518772,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "prepSpeaker"
+        }
+      }
+    },
+    {
+      "timestamp": 5.6965978825187715,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "shoot"
+        }
+      }
+    },
+    {
+      "timestamp": 6.577824184713146,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "intake"
+        }
+      }
+    },
+    {
+      "timestamp": 11.432065632738542,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "prepSpeaker"
+        }
+      }
+    },
+    {
+      "timestamp": 11.832065632738543,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "shoot"
+        }
+      }
+    }
+  ]
 }

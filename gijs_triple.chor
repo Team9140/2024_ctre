@@ -7654,7 +7654,86 @@
             "defaultControlIntervalCount": 40,
             "usesDefaultFieldObstacles": true,
             "circleObstacles": [],
-            "eventMarkers": [],
+            "eventMarkers": [
+                {
+                    "name": "Intake 1",
+                    "target": 0,
+                    "trajTargetIndex": 0,
+                    "targetTimestamp": 0,
+                    "offset": 0,
+                    "command": {
+                        "type": "named",
+                        "data": {
+                            "name": "intake"
+                        }
+                    }
+                },
+                {
+                    "name": "Prep 2",
+                    "target": 3,
+                    "trajTargetIndex": 3,
+                    "targetTimestamp": 4.596597882518772,
+                    "offset": 0.5,
+                    "command": {
+                        "type": "named",
+                        "data": {
+                            "name": "prepSpeaker"
+                        }
+                    }
+                },
+                {
+                    "name": "Shoot 2",
+                    "target": 3,
+                    "trajTargetIndex": 3,
+                    "targetTimestamp": 4.596597882518772,
+                    "offset": 1.1,
+                    "command": {
+                        "type": "named",
+                        "data": {
+                            "name": "shoot"
+                        }
+                    }
+                },
+                {
+                    "name": "Intake 2",
+                    "target": 4,
+                    "trajTargetIndex": 4,
+                    "targetTimestamp": 6.177824184713145,
+                    "offset": 0.4,
+                    "command": {
+                        "type": "named",
+                        "data": {
+                            "name": "intake"
+                        }
+                    }
+                },
+                {
+                    "name": "Prep 3",
+                    "target": 7,
+                    "trajTargetIndex": 7,
+                    "targetTimestamp": 10.932065632738542,
+                    "offset": 0.5,
+                    "command": {
+                        "type": "named",
+                        "data": {
+                            "name": "prepSpeaker"
+                        }
+                    }
+                },
+                {
+                    "name": "Shoot 3",
+                    "target": 7,
+                    "trajTargetIndex": 7,
+                    "targetTimestamp": 10.932065632738542,
+                    "offset": 0.9,
+                    "command": {
+                        "type": "named",
+                        "data": {
+                            "name": "shoot"
+                        }
+                    }
+                }
+            ],
             "isTrajectoryStale": false
         }
     },
