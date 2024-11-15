@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import com.choreo.lib.Choreo;
 import com.choreo.lib.ChoreoControlFunction;
 import com.choreo.lib.ChoreoTrajectoryState;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
@@ -11,7 +12,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.lib.Choreo;
 import frc.robot.lib.ChoreoTrajectory;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public class FollowPath extends Command {
         m_drive = drive;
         m_request = new SwerveRequest.ApplyChassisSpeeds();
         addRequirements(drive);
-        this.trajectory = Choreo.getTrajectory(name);
+        this.trajectory = ChoreoTrajectory.getTrajectory(name);
         this.controller = Choreo.choreoSwerveController(
                 new PIDController(Constants.Drive.kPXController, 0.0, 0.25),
                 new PIDController(Constants.Drive.kPYController, 0.0, 0.25),

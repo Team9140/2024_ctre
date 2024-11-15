@@ -28,7 +28,7 @@
 *.lai
 *.la
 *.a
-*.lib
+*.frc.robot.lib
 
 # Executables
 *.exe

@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.lib.ChoreoTrajectory;
@@ -69,7 +70,7 @@ public class RunAuto extends Command {
     public void setNamedEvent(String name, Supplier<Command> eventSupplier) {
         this.namedEvents.put(name, eventSupplier);
     }
-
+    
     public void parseEventMarkers() {
         for (int i = 0; i < this.paths.length; i++) {
             ChoreoTrajectory trajectory = this.paths[i].getTrajectory();
@@ -106,12 +107,13 @@ public class RunAuto extends Command {
         LinkedList<Command> spacedCommands = new LinkedList<>();
 
         for (int i = currentCommands.size() - 1; i > 0; i--) {
-            spacedCommands.addFirst(currentCommands.get(i).getSecond());
+            int finalI = i;
+            spacedCommands.addFirst(Commands.runOnce(() -> currentCommands.get(finalI).getSecond().schedule()));
             spacedCommands.addFirst(new WaitCommand(currentCommands.get(i).getFirst() - currentCommands.get(i - 1).getFirst()));
         }
 
         if (!spacedCommands.isEmpty()) {
-            spacedCommands.addFirst(currentCommands.get(0).getSecond());
+            spacedCommands.addFirst(Commands.runOnce(() -> currentCommands.get(0).getSecond().schedule()));
             spacedCommands.addFirst(new WaitCommand(currentCommands.get(0).getFirst()));
         }
 
@@ -151,6 +153,8 @@ public class RunAuto extends Command {
         this.parseEventMarkers();
 
         this.getPathCommand(0).initialize();
+
+        this.m_drive.seedFieldRelative(this.paths[0].getInitialPose());
 
         SmartDashboard.putString("starting position", this.paths[0].getInitialPose().toString());
         SmartDashboard.putString("desired ending position", this.paths[this.paths.length - 1].getFinalPose().toString());

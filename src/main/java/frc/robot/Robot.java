@@ -59,10 +59,11 @@ public class Robot extends TimedRobot {
             .onFalse(Commands.runOnce(() -> this.m_autonomousCommand = this.m_robotContainer.getAutonomousCommand(autoName.get())).ignoringDisable(true));
 
     SendableChooser<String> autoChooser = new SendableChooser<>();
-    autoChooser.addOption("Skibidi Rizz", "TestPath");
-    autoChooser.addOption("Source side", "SourceSide");
-    autoChooser.addOption("Amp side", "AmpSide");
-    autoChooser.setDefaultOption("None", null);
+    autoChooser.addOption("cheese", "cheese");
+    autoChooser.addOption("sauce", "sauce");
+    autoChooser.addOption("simple", "simple");
+    autoChooser.addOption("test", "test");
+    autoChooser.setDefaultOption("None", "");
     autoChooser.onChange((name) -> {
       autoName.set(name);
       this.m_autonomousCommand = this.m_robotContainer.getAutonomousCommand(autoName.get());

@@ -69,10 +69,11 @@ public class RobotContainer {
 
   public RobotContainer() {
     configureBindings();
+    SmartDashboard.putData(this.f);
   }
 
   private void configureBindings() {
-    drivetrain.setDefaultCommand(drivetrain.teleopDrive(joystick::getLeftX, joystick::getLeftY, joystick::getRightX));
+    this.drivetrain.setDefaultCommand(drivetrain.teleopDrive(joystick::getLeftX, joystick::getLeftY, joystick::getRightX).ignoringDisable(true));
 
     joystick.start().onTrue(drivetrain.runOnce(() -> {
       Pose2d currentPose = this.drivetrain.getState().Pose;
@@ -171,21 +172,27 @@ public class RobotContainer {
 
   public Command getAutonomousCommand(String autoName) {
     RunAuto auto = null;
+
     switch (autoName){
-      case "Simple":
-        auto = new RunAuto("TestPath", this.drivetrain, 1, true, this.f);
+      case "test":
+      case "cheese":
+      case "sauce":
+      case "simple":
+        auto = new RunAuto(autoName, drivetrain, 1, true, this.f);
+        auto.setNamedEvent("intake", () -> this.intake.intakeNote()
+                .alongWith(this.arm.setIntake())
+                .alongWith(this.thrower.setIntake()));
+        auto.setNamedEvent("intakeOff", () -> this.arm.setStow()
+                .alongWith(this.intake.off())
+                .alongWith(this.thrower.off()));
+        auto.setNamedEvent("prepSpeaker", () -> this.intake.off()
+                .alongWith(this.thrower.prepareSpeaker())
+                .alongWith(this.arm.setAngle(Constants.Arm.Positions.OVERHAND + 0.02)));
+        auto.setNamedEvent("shoot", this.thrower::launch);
+        break;
       default:
         this.f.getObject("traj").setPoses();
         this.f.getObject("trajPoses").setPoses();
-    }
-
-    if (auto != null) {
-      auto.setNamedEvent("intake", () -> this.intake.intakeNote()
-              .alongWith(this.arm.setIntake())
-              .alongWith(this.thrower.setIntake()));
-      auto.setNamedEvent("intakeOff", () -> this.arm.setStow()
-              .alongWith(this.intake.off())
-              .alongWith(this.thrower.off()));
     }
 
     return auto;
