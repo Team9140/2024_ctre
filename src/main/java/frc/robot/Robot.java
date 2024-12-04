@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.LimeLight;
+import frc.robot.subsystems.Limelight;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -28,10 +28,12 @@ public class Robot extends TimedRobot {
   SendableChooser<String> startSpot = new SendableChooser<>();
   // PowerDistribution pd = new PowerDistribution(0, ModuleType.kRev);
 
+  private Limelight mLimelight;
+
   @Override
   public void robotInit() {
-    LimeLight.front.start();
-    LimeLight.back.start();
+
+    mLimelight = Limelight.getInstance();
 
     // pd.setSwitchableChannel(true);
     m_robotContainer = new RobotContainer();
@@ -123,9 +125,9 @@ public class Robot extends TimedRobot {
     m_robotContainer.drivetrain.setAlliance(ally);
 
     if (ally.equals(Alliance.Blue)) {
-      LimeLight.front.setPriorityTag(7);
+      Limelight.front.setPriorityTag(7);
     } else {
-      LimeLight.front.setPriorityTag(4);
+      Limelight.front.setPriorityTag(4);
     }
   }
 

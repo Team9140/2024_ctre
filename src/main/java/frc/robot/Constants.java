@@ -9,6 +9,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.generated.TunerConstants;
+import frc.robot.limelight.LimelightConstants;
 
 /**
  * A class containing settings and values needed by several subsystems
@@ -255,6 +256,8 @@ public final class Constants {
     // public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(16);
     // public static final double CAMERA_PITCH_RADS = Units.degreesToRadians(45);
     public static final AprilTagFieldLayout field = null; // FIXME: add json file
+    public static final LimelightConstants kLimelightConstants = kPracticeBot ? LimelightConstantsFactory.getConstantsForId(kPracticeLLId) : LimelightConstantsFactory.getConstantsForId(kCompLLId);
+
 
     // Position of camera relative to the robot
     public static final Transform3d cameraToRobot = new Transform3d();
