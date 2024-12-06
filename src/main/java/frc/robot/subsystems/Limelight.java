@@ -2,9 +2,10 @@ package frc.robot.subsystems;
 
 import java.util.EnumSet;
 
-import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.field.Field;
+import frc.robot.field.AprilTag;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -24,7 +25,7 @@ import org.opencv.core.Point;
 
 import java.util.*;
 
-import static com.sun.tools.classfile.AccessFlags.Kind.Field;
+//import static com.sun.tools.classfile.AccessFlags.Kind.Field;
 import static org.opencv.core.CvType.CV_64FC1;
 
 public class Limelight extends SubsystemBase {
@@ -58,11 +59,11 @@ public class Limelight extends SubsystemBase {
         mNetworkTable = NetworkTableInstance.getDefault().getTable("limelight");
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                mCameraMatrix.put(i, j, Constants.kLimelightConstants.getUndistortConstants().getCameraMatrix()[i][j]);
+                mCameraMatrix.put(i, j, Constants.Camera.kLimelightConstants.getUndistortConstants().getCameraMatrix()[i][j]);
             }
         }
         for (int i = 0; i < 5; i++) {
-            mDistortionCoeffients.put(0, i, Constants.kLimelightConstants.getUndistortConstants().getCameraDistortion()[i]);
+            mDistortionCoeffients.put(0, i, Constants.Camera.kLimelightConstants.getUndistortConstants().getCameraDistortion()[i]);
         }
     }
 
@@ -90,6 +91,7 @@ public class Limelight extends SubsystemBase {
         public Translation2d getCameraToTag()  {
             return cameraToTarget;
         }
+
         public Pose2d getFieldToTag() {
             return fieldToTag;
         }
@@ -140,9 +142,9 @@ public class Limelight extends SubsystemBase {
      */
     private void readInputsAndAddVisionUpdate() {
         final double timestamp = Timer.getFPGATimestamp();
-        mPeriodicIO.imageCaptureLatency = mNetworkTable.getEntry("cl").getDouble(Constants.kImageCaptureLatency);
+        mPeriodicIO.imageCaptureLatency = mNetworkTable.getEntry("cl").getDouble(Constants.Camera.kImageCaptureLatency);
         mPeriodicIO.latency = mNetworkTable.getEntry("tl").getDouble(0) / 1000.0 + mPeriodicIO.imageCaptureLatency / 1000.0
-                + Constants.kLimelightTransmissionTimeLatency;
+                + Constants.Camera.kLimelightTransmissionTimeLatency;
         mPeriodicIO.givenPipeline = (int) mNetworkTable.getEntry("getpipe").getDouble(0);
         mPeriodicIO.seesTarget = mNetworkTable.getEntry("tv").getDouble(0) == 1.0;
         mPeriodicIO.tagId = (int) mNetworkTable.getEntry("tid").getNumber(-1).doubleValue();

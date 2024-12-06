@@ -5,7 +5,7 @@ public interface UndistortMap {
      * Get an undistorted point with normalized input and output
      * @param x Normalized [0, 1] row value to undistort
      * @param y Normalized [0, 1] col value to undistort
-     * @return Normalized + undistorted  point in form [x,y]
+     * @return Normalized + un:distorted  point in form [x,y]
      */
     double[] normalizedToUndistortedNormalized(double x, double y);
 

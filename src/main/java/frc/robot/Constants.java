@@ -10,6 +10,11 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.generated.TunerConstants;
 import frc.robot.limelight.LimelightConstants;
+import frc.robot.limelight.LimelightConstantsFactory;
+
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 
 /**
  * A class containing settings and values needed by several subsystems
@@ -37,6 +42,15 @@ public final class Constants {
 
   public static final double CAMERA_RANGE = 10.0;
   public static final double SCORING_RANGE = 120.0;
+
+
+  public static final String kPracticeBotMACAddress = ""; //limelight MAC address I think
+  public static final boolean kPracticeBot = hasMacAddress(kPracticeBotMACAddress);
+  public static final boolean kUseVelocityDrive = true;
+
+  public static final String kPracticeLLId = "A";
+  public static final String kCompLLId = "B";
+
 
   // old kraken / neo drive values
   /*
@@ -138,6 +152,43 @@ public final class Constants {
    * }
    * }
    */
+
+  /**
+   * Check if this system has a certain mac address in any network device.
+   * @param mac_address Mac address to check.
+   * @return true if some device with this mac address exists on this system.
+   */
+  public static boolean hasMacAddress(final String mac_address) {
+    try {
+      Enumeration<NetworkInterface> nwInterface = NetworkInterface.getNetworkInterfaces();
+      while (nwInterface.hasMoreElements()) {
+        NetworkInterface nis = nwInterface.nextElement();
+        if (nis == null) {
+          continue;
+        }
+        StringBuilder device_mac_sb = new StringBuilder();
+        System.out.println("hasMacAddress: NIS: " + nis.getDisplayName());
+        byte[] mac = nis.getHardwareAddress();
+        if (mac != null) {
+          for (int i = 0; i < mac.length; i++) {
+            device_mac_sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));
+          }
+          String device_mac = device_mac_sb.toString();
+          System.out.println("hasMacAddress: NIS " + nis.getDisplayName() + " device_mac: " + device_mac);
+          if (mac_address.equals(device_mac)) {
+            System.out.println("hasMacAddress: ** Mac address match! " + device_mac);
+            return true;
+          }
+        } else {
+          System.out.println("hasMacAddress: Address doesn't exist or is not accessible");
+        }
+      }
+
+    } catch (SocketException e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
 
   public static class Drive {
     public static final double MAX_SPEED_MPS = TunerConstants.kSpeedAt12VoltsMps * 0.95; // meters per second
@@ -258,6 +309,8 @@ public final class Constants {
     public static final AprilTagFieldLayout field = null; // FIXME: add json file
     public static final LimelightConstants kLimelightConstants = kPracticeBot ? LimelightConstantsFactory.getConstantsForId(kPracticeLLId) : LimelightConstantsFactory.getConstantsForId(kCompLLId);
 
+    public static final double kLimelightTransmissionTimeLatency = 0.0 / 1000.0; // seconds
+    public static final double kImageCaptureLatency = 11.0; // milliseconds
 
     // Position of camera relative to the robot
     public static final Transform3d cameraToRobot = new Transform3d();
